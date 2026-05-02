@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>购物决策助手</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.08);
+    --border2: rgba(0,0,0,0.14);
+    --text: #1a1916;
+    --text2: #6b6960;
+    --text3: #9e9c94;
+    --accent: #2563eb;
+    --accent-bg: #eff6ff;
+    --green: #16a34a;
+    --green-bg: #f0fdf4;
+    --red: #dc2626;
+    --red-bg: #fef2f2;
+    --amber: #d97706;
+    --amber-bg: #fffbeb;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --surface: #1c1c1a;
+      --surface2: #252523;
+      --border: rgba(255,255,255,0.08);
+      --border2: rgba(255,255,255,0.14);
+      --text: #e8e6df;
+      --text2: #9e9c94;
+      --text3: #6b6960;
+      --accent: #60a5fa;
+      --accent-bg: #1e3a5f;
+      --green: #4ade80;
+      --green-bg: #052e16;
+      --red: #f87171;
+      --red-bg: #2d0a0a;
+      --amber: #fbbf24;
+      --amber-bg: #2d1d02;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif; line-height: 1.6; min-height: 100vh; }
+
+  /* Layout */
+  .app { max-width: 780px; margin: 0 auto; padding: 0 16px 80px; }
+  header { padding: 24px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
+  header p { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* Nav tabs */
+  .tabs { display: flex; gap: 2px; background: var(--surface2); border-radius: var(--radius); padding: 3px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { flex: 1; min-width: 64px; padding: 7px 10px; font-size: 13px; font-weight: 500; border: none; background: none; color: var(--text2); border-radius: 7px; cursor: pointer; transition: all 0.15s; white-space: nowrap; text-align: center; }
+  .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  /* Sections */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .card-sm { padding: 12px 14px; }
+  .card.highlight { border-color: var(--green); }
+
+  /* Form elements */
+  label { font-size: 12px; color: var(--text2); font-weight: 500; display: block; margin-bottom: 5px; }
+  select, input[type=text], input[type=number], textarea {
+    width: 100%; padding: 8px 10px; font-size: 13px;
+    border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface); color: var(--text);
+    font-family: inherit; transition: border 0.15s;
+  }
+  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 60px; }
+  .row { display: grid; gap: 10px; margin-bottom: 12px; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+  @media(max-width: 480px) { .row-3 { grid-template-columns: 1fr 1fr; } }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .btn:hover { background: var(--surface2); }
+  .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .btn-primary:hover { opacity: 0.82; }
+  .btn-danger { color: var(--red); border-color: rgba(220,38,38,0.25); }
+  .btn-danger:hover { background: var(--red-bg); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* Tags & badges */
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.2px; }
+  .tag-best { background: var(--green-bg); color: var(--green); }
+  .tag-value { background: var(--accent-bg); color: var(--accent); }
+  .tag-perf { background: var(--amber-bg); color: var(--amber); }
+  .tag-active { background: var(--green-bg); color: var(--green); }
+  .tag-eol-soon { background: var(--amber-bg); color: var(--amber); }
+  .tag-eol { background: var(--surface2); color: var(--text3); }
+
+  /* Score bars */
+  .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .score-lbl { font-size: 11px; color: var(--text2); width: 52px; flex-shrink: 0; }
+  .bar-bg { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+  .score-num { font-size: 11px; font-weight: 600; width: 18px; text-align: right; color: var(--text2); }
+
+  /* Metric cards */
+  .metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+  .metric { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; text-align: center; }
+  .metric-val { font-size: 20px; font-weight: 600; }
+  .metric-lbl { font-size: 11px; color: var(--text3); margin-top: 1px; }
+
+  /* Verdict box */
+  .verdict { border-radius: var(--radius); padding: 14px 16px; margin-top: 12px; }
+  .verdict-yes { background: var(--green-bg); border: 1px solid rgba(22,163,74,0.25); }
+  .verdict-no { background: var(--red-bg); border: 1px solid rgba(220,38,38,0.2); }
+  .verdict-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+  .verdict-yes .verdict-title { color: var(--green); }
+  .verdict-no .verdict-title { color: var(--red); }
+  .verdict-body { font-size: 13px; line-height: 1.6; }
+  .verdict-yes .verdict-body { color: color-mix(in srgb, var(--green) 80%, var(--text)); }
+  .verdict-no .verdict-body { color: color-mix(in srgb, var(--red) 70%, var(--text)); }
+
+  /* Reason box */
+  .reason { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 10px; font-size: 12px; color: var(--text2); line-height: 1.7; }
+
+  /* Compare table */
+  .cmp-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 480px; }
+  .cmp-table th { text-align: left; padding: 8px 10px; font-weight: 600; font-size: 11px; color: var(--text3); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .cmp-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table tr.top-row td { background: color-mix(in srgb, var(--green-bg) 50%, transparent); }
+  .best-val { color: var(--green); font-weight: 600; }
+
+  /* Pref sliders */
+  .pref-row { margin-bottom: 16px; }
+  .pref-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .pref-header span:last-child { font-weight: 600; color: var(--text2); }
+  input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
+
+  /* Admin */
+  .admin-section { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
+  .admin-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text2); }
+  .item-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
+  .item-row-info { font-size: 13px; }
+  .item-row-info span { font-weight: 500; }
+  .item-row-info small { font-size: 11px; color: var(--text3); margin-left: 8px; }
+  .item-row-actions { display: flex; gap: 6px; }
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  /* Empty state */
+  .empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* Price badge */
+  .price-main { font-size: 20px; font-weight: 700; color: var(--text); }
+  .price-sub { font-size: 11px; color: var(--text3); }
+  .price-updated { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .modal { background: var(--surface); border-radius: var(--radius); padding: 20px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+  .modal h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .modal-overlay.hidden { display: none; }
+
+  /* Toast */
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; z-index: 200; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+
+  /* Header badge */
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .count-badge { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 3px 8px; border-radius: 20px; }
+
+  /* Info hint */
+  .hint { font-size: 11px; color: var(--text3); line-height: 1.6; margin-top: 6px; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+
+  /* Section title */
+  .section-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div>
+      <h1>🛍 购物决策助手</h1>
+      <p>帮你回答：哪个最适合我，多花的钱值不值</p>
+    </div>
+    <div class="header-right">
+      <span class="count-badge" id="item-count">0 件商品</span>
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('recommend',this)">推荐</button>
+    <button class="tab" onclick="switchTab('compare',this)">对比</button>
+    <button class="tab" onclick="switchTab('upgrade',this)">升级分析</button>
+    <button class="tab" onclick="switchTab('prefs',this)">我的偏好</button>
+    <button class="tab" onclick="switchTab('admin',this)">管理商品</button>
+  </div>
+
+  <!-- 推荐 -->
+  <div class="section active" id="tab-recommend">
+    <div class="card card-sm">
+      <div class="row row-3">
+        <div>
+          <label>品类</label>
+          <select id="rec-cat" onchange="renderRecommend()"></select>
+        </div>
+        <div>
+          <label>使用场景</label>
+          <select id="rec-use" onchange="renderRecommend()">
+            <option value="daily">日常使用</option>
+            <option value="pro">专业创作</option>
+            <option value="gaming">游戏娱乐</option>
+            <option value="travel">出差旅行</option>
+          </select>
+        </div>
+        <div>
+          <label>预算上限（元）</label>
+          <input type="number" id="rec-budget" value="5000" min="100" step="500" oninput="renderRecommend()">
+        </div>
+      </div>
+    </div>
+    <div id="rec-results"></div>
+  </div>
+
+  <!-- 对比 -->
+  <div class="section" id="tab-compare">
+    <div class="card card-sm" style="margin-bottom:14px">
+      <div class="row row-2">
+        <div>
+          <label>品类</label>
+          <select id="cmp-cat" onchange="renderCompare()"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <p class="hint">★ 标注该维度最优，绿色行为综合推荐</p>
+        </div>
+      </div>
+    </div>
+    <div id="cmp-results"></div>
+  </div>
+
+  <!-- 升级分析 -->
+  <div class="section" id="tab-upgrade">
+    <div class="card card-sm" style="margin-bottom:14px">
+      <div class="row row-2">
+        <div>
+          <label>品类</label>
+          <select id="upg-cat" onchange="fillUpgradeSelects()"></select>
+        </div>
+      </div>
+      <div class="row row-2">
+        <div>
+          <label>我现在用的</label>
+          <select id="upg-from" onchange="renderUpgrade()"></select>
+        </div>
+        <div>
+          <label>想升级到</label>
+          <select id="upg-to" onchange="renderUpgrade()"></select>
+        </div>
+      </div>
+      <div>
+        <label>值得升级的阈值（分/千元）</label>
+        <input type="number" id="upg-thresh" value="0.05" min="0.01" step="0.01" style="width:120px" oninput="renderUpgrade()">
+        <p class="hint">越高越严格。默认 0.05 表示每多花 1000 元至少要提升 0.05 综合分才算值得。</p>
+      </div>
+    </div>
+    <div id="upg-results"></div>
+  </div>
+
+  <!-- 偏好 -->
+  <div class="section" id="tab-prefs">
+    <div class="card">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">设置各维度的优先级权重（1–10），影响推荐、对比、升级分析的综合评分。</p>
+      <div id="pref-sliders"></div>
+      <hr class="divider">
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn" onclick="resetPrefs()">恢复默认</button>
+        <button class="btn btn-primary" onclick="savePrefs()">保存偏好</button>
+      </div>
+    </div>
+    <div class="card card-sm" style="margin-top:4px">
+      <p class="section-title">算法说明</p>
+      <p style="font-size:12px;color:var(--text2);line-height:1.8">
+        <b>综合评分</b> = 各维度(评分 × 偏好权重)之和 ÷ 权重总和 ÷ 价格效用因子<br>
+        <b>价格效用因子</b> = log₁₀(价格/1000 + 1) × 1.5 + 1（越贵越需要更高分才能胜出）<br>
+        <b>升级价值</b> = 综合分差 ÷ |价格差| × 1000（单位：分/千元）<br>
+        规则完全透明，你的偏好权重决定一切。
+      </p>
+    </div>
+  </div>
+
+  <!-- 管理商品 -->
+  <div class="section" id="tab-admin">
+    <div class="card card-sm" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div>
+        <p style="font-size:13px;font-weight:600">商品库管理</p>
+        <p class="hint">所有数据保存在本地浏览器，换设备需重新添加。</p>
+      </div>
+      <button class="btn btn-primary" onclick="openAddModal()">＋ 添加商品</button>
+    </div>
+    <div id="admin-by-cat"></div>
+  </div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="modal-overlay hidden" id="modal">
+  <div class="modal">
+    <h2 id="modal-title">添加商品</h2>
+    <div class="row row-2">
+      <div>
+        <label>商品名称 *</label>
+        <input type="text" id="f-name" placeholder="如：MacBook Air M3">
+      </div>
+      <div>
+        <label>品类 *</label>
+        <input type="text" id="f-cat" placeholder="如：笔记本电脑">
+      </div>
+    </div>
+    <div class="row row-2">
+      <div>
+        <label>参考价格（元）*</label>
+        <input type="number" id="f-price" placeholder="9499" min="1">
+      </div>
+      <div>
+        <label>生命周期状态</label>
+        <select id="f-status">
+          <option value="active">在售</option>
+          <option value="eol-soon">即将停产</option>
+          <option value="eol">已停产</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:10px">
+      <label>备注（可选）</label>
+      <textarea id="f-note" placeholder="产品特色、购买建议等"></textarea>
+    </div>
+    <hr class="divider">
+    <p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">各维度评分（0–10）</p>
+    <div class="score-grid" id="score-grid"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveItem()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── Data ────────────────────────────────────────────────────────────────────
+const DIMS = {
+  perf:        { label: '性能', color: '#16a34a' },
+  battery:     { label: '续航', color: '#2563eb' },
+  portability: { label: '便携', color: '#7c3aed' },
+  display:     { label: '屏幕/音质', color: '#d97706' },
+  value:       { label: '性价比', color: '#db2777' },
+};
+const DIM_KEYS = Object.keys(DIMS);
+
+const DEFAULT_PREFS = { perf:7, battery:6, portability:5, display:5, value:8 };
+
+const SAMPLE_ITEMS = [
+  { id:'s1', name:'MacBook Air M3', cat:'笔记本电脑', price:9499, status:'active', note:'轻薄长续航，M3芯片综合性能优秀', scores:{perf:8.5,battery:9,portability:9,display:8,value:6}, updated:'2025-01' },
+  { id:'s2', name:'ThinkPad X1 Carbon', cat:'笔记本电脑', price:8999, status:'active', note:'商务旗舰，键盘手感最佳', scores:{perf:7.5,battery:8,portability:8.5,display:7.5,value:6.5}, updated:'2025-01' },
+  { id:'s3', name:'小米笔记本 Pro 14', cat:'笔记本电脑', price:4999, status:'active', note:'高性价比，屏幕素质突出', scores:{perf:7,battery:7.5,portability:8,display:8,value:8.5}, updated:'2025-01' },
+  { id:'s4', name:'联想 Y9000P', cat:'笔记本电脑', price:7499, status:'active', note:'游戏性能强悍，散热优秀', scores:{perf:9.5,battery:5,portability:5,display:8.5,value:7}, updated:'2025-01' },
+  { id:'s5', name:'荣耀 MagicBook 14', cat:'笔记本电脑', price:3999, status:'active', note:'入门轻薄本性价比首选', scores:{perf:6.5,battery:8,portability:8.5,display:7,value:9}, updated:'2025-01' },
+  { id:'s6', name:'iPhone 16 Pro', cat:'手机', price:8999, status:'active', note:'iOS生态最强，拍照顶级', scores:{perf:9.5,battery:7.5,portability:7,display:9.5,value:6}, updated:'2025-01' },
+  { id:'s7', name:'小米 15 Pro', cat:'手机', price:5999, status:'active', note:'安卓旗舰综合均衡', scores:{perf:8.5,battery:8.5,portability:7.5,display:9,value:7.5}, updated:'2025-01' },
+  { id:'s8', name:'一加 13', cat:'手机', price:4499, status:'active', note:'超大电池，快充最强', scores:{perf:8.5,battery:9,portability:7.5,display:8.5,value:8.5}, updated:'2025-01' },
+  { id:'s9', name:'Sony WH-1000XM5', cat:'耳机', price:2799, status:'active', note:'降噪业界标杆', scores:{perf:9,battery:8.5,portability:7.5,display:9,value:7}, updated:'2025-01' },
+  { id:'s10', name:'AirPods Pro 2', cat:'耳机', price:1899, status:'active', note:'iOS生态最无缝，小巧便携', scores:{perf:8,battery:7,portability:9.5,display:8,value:7.5}, updated:'2025-01' },
+  { id:'s11', name:'1MORE SonoFlow Pro', cat:'耳机', price:699, status:'active', note:'国产高性价比，音质超越同价位', scores:{perf:7,battery:8.5,portability:7.5,display:7,value:9.5}, updated:'2025-01' },
+];
+
+function loadData() {
+  const raw = localStorage.getItem('shopping_items');
+  if (raw) return JSON.parse(raw);
+  localStorage.setItem('shopping_items', JSON.stringify(SAMPLE_ITEMS));
+  return SAMPLE_ITEMS;
+}
+function saveData(items) {
+  localStorage.setItem('shopping_items', JSON.stringify(items));
+}
+function loadPrefs() {
+  const raw = localStorage.getItem('shopping_prefs');
+  return raw ? JSON.parse(raw) : { ...DEFAULT_PREFS };
+}
+function savePrefsData(p) {
+  localStorage.setItem('shopping_prefs', JSON.stringify(p));
+}
+
+let items = loadData();
+let prefs = loadPrefs();
+
+function getCategories() {
+  return [...new Set(items.map(i => i.cat))];
+}
+function getItemsByCat(cat) {
+  return items.filter(i => i.cat === cat);
+}
+
+// ─── Scoring ─────────────────────────────────────────────────────────────────
+function calcScore(item) {
+  const totalW = DIM_KEYS.reduce((s, k) => s + prefs[k], 0);
+  const weighted = DIM_KEYS.reduce((s, k) => s + (item.scores[k] || 0) * prefs[k], 0);
+  const raw = weighted / totalW;
+  const priceFactor = Math.log10(item.price / 1000 + 1) * 1.5 + 1;
+  return +(raw / priceFactor * 2.5).toFixed(2);
+}
+function calcRawScore(item) {
+  const totalW = DIM_KEYS.reduce((s, k) => s + prefs[k], 0);
+  return +(DIM_KEYS.reduce((s, k) => s + (item.scores[k] || 0) * prefs[k], 0) / totalW).toFixed(2);
+}
+
+// ─── UI Helpers ───────────────────────────────────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+function switchTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'recommend') renderRecommend();
+  if (id === 'compare') renderCompare();
+  if (id === 'upgrade') { fillCatSelects('upg-cat'); fillUpgradeSelects(); }
+  if (id === 'admin') renderAdmin();
+}
+function fillCatSelect(id) {
+  const sel = document.getElementById(id);
+  const cats = getCategories();
+  const prev = sel.value;
+  sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+  if (cats.includes(prev)) sel.value = prev;
+}
+function fillCatSelects(...ids) {
+  ids.forEach(fillCatSelect);
+}
+function updateItemCount() {
+  document.getElementById('item-count').textContent = items.length + ' 件商品';
+}
+function statusTag(status) {
+  if (status === 'eol') return '<span class="tag tag-eol">已停产</span>';
+  if (status === 'eol-soon') return '<span class="tag tag-eol-soon">即将停产</span>';
+  return '<span class="tag tag-active">在售</span>';
+}
+
+// ─── Recommend ────────────────────────────────────────────────────────────────
+function renderRecommend() {
+  fillCatSelect('rec-cat');
+  const cat = document.getElementById('rec-cat').value;
+  const use = document.getElementById('rec-use').value;
+  const budget = +document.getElementById('rec-budget').value;
+  const pool = getItemsByCat(cat).filter(i => i.price <= budget * 1.2 && i.status !== 'eol');
+  const el = document.getElementById('rec-results');
+  if (!pool.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>预算范围内暂无商品，请提高预算或添加商品</div>';
+    return;
+  }
+  const scored = pool.map(i => ({ ...i, final: calcScore(i) })).sort((a, b) => b.final - a.final);
+  const bestValue = [...pool].sort((a, b) => calcRawScore(b) / b.price - calcRawScore(a) / a.price)[0];
+  const bestPerf = [...pool].sort((a, b) => b.scores.perf - a.scores.perf)[0];
+
+  // use-case bonus dim
+  const useDims = { daily:['battery','portability'], pro:['perf','display'], gaming:['perf','display'], travel:['portability','battery'] };
+  const bonus = useDims[use] || [];
+
+  const picks = [];
+  const seen = new Set();
+  const add = (item, tag, tagClass, reason) => {
+    if (!seen.has(item.id)) { seen.add(item.id); picks.push({ item, tag, tagClass, reason }); }
+  };
+  add(scored[0], '最适合你', 'tag-best', makeReason(scored[0], bonus, use));
+  add(bestValue, '性价比最高', 'tag-value', '单位价格换来的加权分最高，适合预算敏感型选择。');
+  add(bestPerf, '性能最强', 'tag-perf', `性能评分 ${bestPerf.scores.perf}/10，预算内硬实力最强。`);
+
+  el.innerHTML = picks.map(({ item, tag, tagClass, reason }) => `
+    <div class="card ${tag === '最适合你' ? 'highlight' : ''}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <span style="font-size:15px;font-weight:600">${item.name}</span>
+            ${statusTag(item.status)}
+          </div>
+          <div class="price-main">¥${item.price.toLocaleString()}</div>
+          ${item.updated ? `<div class="price-updated">价格更新：${item.updated}</div>` : ''}
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <span class="tag ${tagClass}">${tag}</span>
+          <div style="font-size:22px;font-weight:700;margin-top:6px;color:${tag === '最适合你' ? 'var(--green)' : 'var(--text)'}">${calcScore(item)}</div>
+          <div style="font-size:11px;color:var(--text3)">综合评分</div>
+        </div>
+      </div>
+      ${DIM_KEYS.map(k => `
+        <div class="score-row">
+          <span class="score-lbl">${DIMS[k].label}</span>
+          <div class="bar-bg"><div class="bar-fill" style="width:${item.scores[k]*10}%;background:${DIMS[k].color}"></div></div>
+          <span class="score-num">${item.scores[k]}</span>
+        </div>`).join('')}
+      <div class="reason">${reason}${item.note ? '<br><span style="color:var(--text3)">💬 '+item.note+'</span>' : ''}</div>
+    </div>`).join('');
+}
+
+function makeReason(item, bonus, use) {
+  const useLabel = { daily:'日常使用', pro:'专业创作', gaming:'游戏娱乐', travel:'出差旅行' }[use] || use;
+  const topDims = [...DIM_KEYS].sort((a, b) => prefs[b] * (bonus.includes(b)?1.5:1) - prefs[a] * (bonus.includes(a)?1.5:1)).slice(0, 2);
+  return `针对「${useLabel}」场景，综合你的偏好权重，${topDims.map(k => DIMS[k].label + '(' + item.scores[k] + '/10)').join('、')} 表现突出，最终得分 ${calcScore(item)}/10。`;
+}
+
+// ─── Compare ──────────────────────────────────────────────────────────────────
+function renderCompare() {
+  fillCatSelect('cmp-cat');
+  const cat = document.getElementById('cmp-cat').value;
+  const pool = getItemsByCat(cat);
+  const el = document.getElementById('cmp-results');
+  if (!pool.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>该品类暂无商品</div>';
+    return;
+  }
+  const scored = pool.map(i => ({ ...i, final: calcScore(i) })).sort((a, b) => b.final - a.final);
+  const bestPer = {};
+  DIM_KEYS.forEach(k => { bestPer[k] = Math.max(...pool.map(i => i.scores[k] || 0)); });
+  const bestFinal = Math.max(...scored.map(i => i.final));
+
+  el.innerHTML = `<div class="card" style="padding:12px">
+    <div class="cmp-wrap">
+      <table class="cmp-table">
+        <thead><tr>
+          <th>型号</th>
+          <th>状态</th>
+          <th>价格</th>
+          <th>综合分</th>
+          ${DIM_KEYS.map(k => `<th style="color:${DIMS[k].color}">${DIMS[k].label}</th>`).join('')}
+        </tr></thead>
+        <tbody>
+          ${scored.map(item => `<tr class="${item.final === bestFinal ? 'top-row' : ''}">
+            <td style="font-weight:${item.final === bestFinal ? 600 : 400};white-space:nowrap">${item.name}</td>
+            <td>${statusTag(item.status)}</td>
+            <td style="white-space:nowrap">¥${item.price.toLocaleString()}</td>
+            <td style="font-weight:600;color:${item.final === bestFinal ? 'var(--green)' : 'var(--text)'}">${item.final}</td>
+            ${DIM_KEYS.map(k => `<td class="${item.scores[k] === bestPer[k] ? 'best-val' : ''}">${item.scores[k]}${item.scores[k] === bestPer[k] ? ' ★' : ''}</td>`).join('')}
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+// ─── Upgrade ──────────────────────────────────────────────────────────────────
+function fillUpgradeSelects() {
+  fillCatSelect('upg-cat');
+  const cat = document.getElementById('upg-cat').value;
+  const pool = getItemsByCat(cat);
+  const opts = pool.map((i, idx) => `<option value="${idx}">${i.name} ¥${i.price.toLocaleString()}</option>`).join('');
+  document.getElementById('upg-from').innerHTML = opts;
+  document.getElementById('upg-to').innerHTML = opts;
+  if (pool.length > 1) document.getElementById('upg-to').selectedIndex = 1;
+  renderUpgrade();
+}
+function renderUpgrade() {
+  const cat = document.getElementById('upg-cat').value;
+  const pool = getItemsByCat(cat);
+  const fi = +document.getElementById('upg-from').value;
+  const ti = +document.getElementById('upg-to').value;
+  const thresh = +document.getElementById('upg-thresh').value;
+  const el = document.getElementById('upg-results');
+  if (fi === ti || !pool[fi] || !pool[ti]) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">⚖️</div>请选择两款不同的商品</div>';
+    return;
+  }
+  const from = pool[fi], to = pool[ti];
+  const fromScore = calcScore(from), toScore = calcScore(to);
+  const priceDiff = to.price - from.price;
+  const scoreDiff = +(toScore - fromScore).toFixed(2);
+  const worthVal = priceDiff !== 0 ? +(scoreDiff / Math.abs(priceDiff) * 1000).toFixed(3) : null;
+  const isUpgrade = priceDiff > 0;
+  const isWorth = isUpgrade ? (scoreDiff > 0.2 && worthVal >= thresh) : (scoreDiff >= -0.1);
+
+  let verdictText = '';
+  if (isUpgrade) {
+    if (!isWorth && scoreDiff <= 0) verdictText = `多花 ¥${Math.abs(priceDiff).toLocaleString()} 但综合评分反而${scoreDiff < 0 ? '降低 ' + Math.abs(scoreDiff) + ' 分' : '持平'}，不划算。`;
+    else if (!isWorth) verdictText = `每多花 1000 元仅提升 ${worthVal} 分，低于你设定的阈值 ${thresh}，提升感不明显。`;
+    else verdictText = `每多花 1000 元提升 ${worthVal} 分，超过阈值 ${thresh}，升级物有所值。`;
+  } else {
+    if (scoreDiff >= 0) verdictText = `降价 ¥${Math.abs(priceDiff).toLocaleString()} 的同时综合评分不降反升，强烈推荐。`;
+    else verdictText = `降价 ¥${Math.abs(priceDiff).toLocaleString()}，综合评分小幅降低 ${Math.abs(scoreDiff)} 分，看个人预算取舍。`;
+  }
+
+  el.innerHTML = `<div class="card">
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-val" style="color:${priceDiff > 0 ? 'var(--red)' : 'var(--green)'}">${priceDiff > 0 ? '+' : ''}¥${Math.abs(priceDiff).toLocaleString()}</div>
+        <div class="metric-lbl">价格差异</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:${scoreDiff >= 0 ? 'var(--green)' : 'var(--red)'}">${scoreDiff >= 0 ? '+' : ''}${scoreDiff}</div>
+        <div class="metric-lbl">综合分差</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="font-size:16px">${worthVal !== null ? (worthVal > 0 ? '+' : '') + worthVal : '—'}</div>
+        <div class="metric-lbl">分/千元</div>
+      </div>
+    </div>
+    <div class="verdict ${isWorth ? 'verdict-yes' : 'verdict-no'}">
+      <div class="verdict-title">${isWorth ? '✅ 值得' : '❌ 不建议'}</div>
+      <div class="verdict-body">${verdictText}</div>
+    </div>
+    <div class="reason">
+      <b>${from.name}</b> 综合 ${fromScore} 分，¥${from.price.toLocaleString()}<br>
+      → <b>${to.name}</b> 综合 ${toScore} 分，¥${to.price.toLocaleString()}<br>
+      当前阈值：每千元需提升 ≥ ${thresh} 分。可在上方调整阈值改变标准。
+    </div>
+  </div>`;
+}
+
+// ─── Prefs ────────────────────────────────────────────────────────────────────
+function renderPrefs() {
+  document.getElementById('pref-sliders').innerHTML = DIM_KEYS.map(k => `
+    <div class="pref-row">
+      <div class="pref-header">
+        <span>${DIMS[k].label}</span>
+        <span id="pv-${k}">${prefs[k]}</span>
+      </div>
+      <input type="range" min="1" max="10" step="1" value="${prefs[k]}"
+        oninput="prefs['${k}']=+this.value;document.getElementById('pv-${k}').textContent=this.value">
+    </div>`).join('');
+}
+function savePrefs() {
+  savePrefsData(prefs);
+  toast('偏好已保存，推荐结果已更新 ✓');
+}
+function resetPrefs() {
+  prefs = { ...DEFAULT_PREFS };
+  renderPrefs();
+  savePrefsData(prefs);
+  toast('已恢复默认偏好');
+}
+
+// ─── Admin ────────────────────────────────────────────────────────────────────
+function renderAdmin() {
+  const cats = getCategories();
+  const el = document.getElementById('admin-by-cat');
+  if (!items.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📦</div>暂无商品，点击上方按钮添加</div>';
+    return;
+  }
+  el.innerHTML = cats.map(cat => {
+    const catItems = getItemsByCat(cat);
+    return `<div class="card" style="margin-bottom:12px">
+      <div class="section-title">${cat} <span style="font-weight:400;color:var(--text3)">(${catItems.length})</span></div>
+      <div class="item-list">
+        ${catItems.map(item => `
+          <div class="item-row">
+            <div class="item-info">
+              <div class="item-row-info"><span>${item.name}</span> ${statusTag(item.status)} <small>¥${item.price.toLocaleString()}</small></div>
+              ${item.updated ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">更新：${item.updated}</div>` : ''}
+            </div>
+            <div class="item-row-actions">
+              <button class="btn btn-sm" onclick="openEditModal('${item.id}')">编辑</button>
+              <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.id}')">删除</button>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── Modal ────────────────────────────────────────────────────────────────────
+let editingId = null;
+function buildScoreGrid() {
+  document.getElementById('score-grid').innerHTML = DIM_KEYS.map(k => `
+    <div>
+      <label>${DIMS[k].label}（0–10）</label>
+      <input type="number" id="fs-${k}" min="0" max="10" step="0.5" placeholder="0–10">
+    </div>`).join('');
+}
+function openAddModal() {
+  editingId = null;
+  document.getElementById('modal-title').textContent = '添加商品';
+  buildScoreGrid();
+  ['name','cat','note'].forEach(f => document.getElementById('f-'+f).value = '');
+  document.getElementById('f-price').value = '';
+  document.getElementById('f-status').value = 'active';
+  DIM_KEYS.forEach(k => document.getElementById('fs-'+k).value = '');
+  document.getElementById('modal').classList.remove('hidden');
+}
+function openEditModal(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  editingId = id;
+  document.getElementById('modal-title').textContent = '编辑商品';
+  buildScoreGrid();
+  document.getElementById('f-name').value = item.name;
+  document.getElementById('f-cat').value = item.cat;
+  document.getElementById('f-price').value = item.price;
+  document.getElementById('f-status').value = item.status || 'active';
+  document.getElementById('f-note').value = item.note || '';
+  DIM_KEYS.forEach(k => document.getElementById('fs-'+k).value = item.scores[k] ?? '');
+  document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+}
+function saveItem() {
+  const name = document.getElementById('f-name').value.trim();
+  const cat = document.getElementById('f-cat').value.trim();
+  const price = +document.getElementById('f-price').value;
+  if (!name || !cat || !price) { toast('请填写名称、品类和价格'); return; }
+  const scores = {};
+  for (const k of DIM_KEYS) {
+    const v = parseFloat(document.getElementById('fs-'+k).value);
+    scores[k] = isNaN(v) ? 5 : Math.min(10, Math.max(0, v));
+  }
+  const now = new Date();
+  const updated = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  if (editingId) {
+    const idx = items.findIndex(i => i.id === editingId);
+    if (idx >= 0) items[idx] = { ...items[idx], name, cat, price, status: document.getElementById('f-status').value, note: document.getElementById('f-note').value.trim(), scores, updated };
+  } else {
+    items.push({ id: 'u' + Date.now(), name, cat, price, status: document.getElementById('f-status').value, note: document.getElementById('f-note').value.trim(), scores, updated });
+  }
+  saveData(items);
+  updateItemCount();
+  closeModal();
+  renderAdmin();
+  toast(editingId ? '商品已更新 ✓' : '商品已添加 ✓');
+}
+function deleteItem(id) {
+  if (!confirm('确认删除这件商品？')) return;
+  items = items.filter(i => i.id !== id);
+  saveData(items);
+  updateItemCount();
+  renderAdmin();
+  toast('已删除');
+}
+
+// Close modal on overlay click
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+fillCatSelects('rec-cat', 'cmp-cat', 'upg-cat');
+renderPrefs();
+renderRecommend();
+updateItemCount();
+</script>
+</body>
+</html>
