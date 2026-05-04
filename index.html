@@ -5,764 +5,770 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>购物决策助手</title>
 <style>
-  :root {
-    --bg: #f7f6f3;
-    --surface: #ffffff;
-    --surface2: #f0efe9;
-    --border: rgba(0,0,0,0.08);
-    --border2: rgba(0,0,0,0.14);
-    --text: #1a1916;
-    --text2: #6b6960;
-    --text3: #9e9c94;
-    --accent: #2563eb;
-    --accent-bg: #eff6ff;
-    --green: #16a34a;
-    --green-bg: #f0fdf4;
-    --red: #dc2626;
-    --red-bg: #fef2f2;
-    --amber: #d97706;
-    --amber-bg: #fffbeb;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #111110;
-      --surface: #1c1c1a;
-      --surface2: #252523;
-      --border: rgba(255,255,255,0.08);
-      --border2: rgba(255,255,255,0.14);
-      --text: #e8e6df;
-      --text2: #9e9c94;
-      --text3: #6b6960;
-      --accent: #60a5fa;
-      --accent-bg: #1e3a5f;
-      --green: #4ade80;
-      --green-bg: #052e16;
-      --red: #f87171;
-      --red-bg: #2d0a0a;
-      --amber: #fbbf24;
-      --amber-bg: #2d1d02;
-    }
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { font-size: 15px; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif; line-height: 1.6; min-height: 100vh; }
-
-  /* Layout */
-  .app { max-width: 780px; margin: 0 auto; padding: 0 16px 80px; }
-  header { padding: 24px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-  header h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; }
-  header p { font-size: 12px; color: var(--text3); margin-top: 2px; }
-
-  /* Nav tabs */
-  .tabs { display: flex; gap: 2px; background: var(--surface2); border-radius: var(--radius); padding: 3px; margin-bottom: 20px; overflow-x: auto; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { flex: 1; min-width: 64px; padding: 7px 10px; font-size: 13px; font-weight: 500; border: none; background: none; color: var(--text2); border-radius: 7px; cursor: pointer; transition: all 0.15s; white-space: nowrap; text-align: center; }
-  .tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
-  .tab:hover:not(.active) { color: var(--text); }
-
-  /* Sections */
-  .section { display: none; }
-  .section.active { display: block; }
-
-  /* Cards */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
-  .card-sm { padding: 12px 14px; }
-  .card.highlight { border-color: var(--green); }
-
-  /* Form elements */
-  label { font-size: 12px; color: var(--text2); font-weight: 500; display: block; margin-bottom: 5px; }
-  select, input[type=text], input[type=number], textarea {
-    width: 100%; padding: 8px 10px; font-size: 13px;
-    border: 1px solid var(--border2); border-radius: var(--radius-sm);
-    background: var(--surface); color: var(--text);
-    font-family: inherit; transition: border 0.15s;
-  }
-  select:focus, input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 60px; }
-  .row { display: grid; gap: 10px; margin-bottom: 12px; }
-  .row-2 { grid-template-columns: 1fr 1fr; }
-  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
-  @media(max-width: 480px) { .row-3 { grid-template-columns: 1fr 1fr; } }
-
-  /* Buttons */
-  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 8px 14px; font-size: 13px; font-weight: 500; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); cursor: pointer; transition: all 0.15s; font-family: inherit; }
-  .btn:hover { background: var(--surface2); }
-  .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .btn-primary:hover { opacity: 0.82; }
-  .btn-danger { color: var(--red); border-color: rgba(220,38,38,0.25); }
-  .btn-danger:hover { background: var(--red-bg); }
-  .btn-sm { padding: 5px 10px; font-size: 12px; }
-
-  /* Tags & badges */
-  .tag { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 4px; letter-spacing: 0.2px; }
-  .tag-best { background: var(--green-bg); color: var(--green); }
-  .tag-value { background: var(--accent-bg); color: var(--accent); }
-  .tag-perf { background: var(--amber-bg); color: var(--amber); }
-  .tag-active { background: var(--green-bg); color: var(--green); }
-  .tag-eol-soon { background: var(--amber-bg); color: var(--amber); }
-  .tag-eol { background: var(--surface2); color: var(--text3); }
-
-  /* Score bars */
-  .score-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-  .score-lbl { font-size: 11px; color: var(--text2); width: 52px; flex-shrink: 0; }
-  .bar-bg { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-  .bar-fill { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
-  .score-num { font-size: 11px; font-weight: 600; width: 18px; text-align: right; color: var(--text2); }
-
-  /* Metric cards */
-  .metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
-  .metric { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; text-align: center; }
-  .metric-val { font-size: 20px; font-weight: 600; }
-  .metric-lbl { font-size: 11px; color: var(--text3); margin-top: 1px; }
-
-  /* Verdict box */
-  .verdict { border-radius: var(--radius); padding: 14px 16px; margin-top: 12px; }
-  .verdict-yes { background: var(--green-bg); border: 1px solid rgba(22,163,74,0.25); }
-  .verdict-no { background: var(--red-bg); border: 1px solid rgba(220,38,38,0.2); }
-  .verdict-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-  .verdict-yes .verdict-title { color: var(--green); }
-  .verdict-no .verdict-title { color: var(--red); }
-  .verdict-body { font-size: 13px; line-height: 1.6; }
-  .verdict-yes .verdict-body { color: color-mix(in srgb, var(--green) 80%, var(--text)); }
-  .verdict-no .verdict-body { color: color-mix(in srgb, var(--red) 70%, var(--text)); }
-
-  /* Reason box */
-  .reason { background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 10px; font-size: 12px; color: var(--text2); line-height: 1.7; }
-
-  /* Compare table */
-  .cmp-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .cmp-table { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 480px; }
-  .cmp-table th { text-align: left; padding: 8px 10px; font-weight: 600; font-size: 11px; color: var(--text3); border-bottom: 1px solid var(--border); white-space: nowrap; }
-  .cmp-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .cmp-table tr:last-child td { border-bottom: none; }
-  .cmp-table tr.top-row td { background: color-mix(in srgb, var(--green-bg) 50%, transparent); }
-  .best-val { color: var(--green); font-weight: 600; }
-
-  /* Pref sliders */
-  .pref-row { margin-bottom: 16px; }
-  .pref-header { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
-  .pref-header span:last-child { font-weight: 600; color: var(--text2); }
-  input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; }
-
-  /* Admin */
-  .admin-section { border-top: 1px solid var(--border); padding-top: 16px; margin-top: 16px; }
-  .admin-section h3 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text2); }
-  .item-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--surface2); border-radius: var(--radius-sm); padding: 10px 12px; }
-  .item-row-info { font-size: 13px; }
-  .item-row-info span { font-weight: 500; }
-  .item-row-info small { font-size: 11px; color: var(--text3); margin-left: 8px; }
-  .item-row-actions { display: flex; gap: 6px; }
-  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-  /* Empty state */
-  .empty { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 13px; }
-  .empty-icon { font-size: 32px; margin-bottom: 8px; }
-
-  /* Price badge */
-  .price-main { font-size: 20px; font-weight: 700; color: var(--text); }
-  .price-sub { font-size: 11px; color: var(--text3); }
-  .price-updated { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
-  /* Modal */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .modal { background: var(--surface); border-radius: var(--radius); padding: 20px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
-  .modal h2 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
-  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
-  .modal-overlay.hidden { display: none; }
-
-  /* Toast */
-  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 18px; border-radius: 20px; font-size: 13px; font-weight: 500; z-index: 200; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
-  .toast.show { opacity: 1; }
-
-  /* Header badge */
-  .header-right { display: flex; align-items: center; gap: 8px; }
-  .count-badge { font-size: 11px; background: var(--surface2); border: 1px solid var(--border); color: var(--text2); padding: 3px 8px; border-radius: 20px; }
-
-  /* Info hint */
-  .hint { font-size: 11px; color: var(--text3); line-height: 1.6; margin-top: 6px; }
-
-  /* Divider */
-  .divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-
-  /* Section title */
-  .section-title { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+:root{--bg:#f5f4f0;--sf:#fff;--sf2:#f0efe9;--sf3:#e8e7e0;--bd:rgba(0,0,0,0.08);--bd2:rgba(0,0,0,0.13);--tx:#1a1916;--tx2:#6b6960;--tx3:#a09e96;--gn:#15803d;--gn-bg:#f0fdf4;--gn-bd:rgba(21,128,61,0.2);--rd:#b91c1c;--rd-bg:#fef2f2;--rd-bd:rgba(185,28,28,0.2);--am:#b45309;--am-bg:#fffbeb;--ac:#1d4ed8;--ac-bg:#eff6ff;--ac-tx:#1e40af;--r:10px;--rs:6px;--sh:0 1px 3px rgba(0,0,0,0.07);}
+@media(prefers-color-scheme:dark){:root{--bg:#0f0f0e;--sf:#1a1a18;--sf2:#232320;--sf3:#2c2c28;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.13);--tx:#e8e6df;--tx2:#9e9c94;--tx3:#6b6960;--gn:#4ade80;--gn-bg:#052e16;--gn-bd:rgba(74,222,128,0.2);--rd:#f87171;--rd-bg:#2d0a0a;--rd-bd:rgba(248,113,113,0.2);--am:#fbbf24;--am-bg:#2d1d02;--ac:#60a5fa;--ac-bg:#1e3a5f;--ac-tx:#93c5fd;}}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,'PingFang SC','Noto Sans SC',sans-serif;line-height:1.6;min-height:100vh;}
+.app{max-width:820px;margin:0 auto;padding:0 16px 100px;}
+header{padding:20px 0 16px;border-bottom:1px solid var(--bd);margin-bottom:18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+header h1{font-size:16px;font-weight:700;}
+header p{font-size:11px;color:var(--tx3);margin-top:2px;}
+.badge{font-size:11px;background:var(--sf2);border:1px solid var(--bd);color:var(--tx2);padding:3px 9px;border-radius:20px;}
+.tabs{display:flex;gap:2px;background:var(--sf2);border-radius:var(--r);padding:3px;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:56px;padding:7px 8px;font-size:12px;font-weight:500;border:none;background:none;color:var(--tx2);border-radius:7px;cursor:pointer;transition:all .15s;white-space:nowrap;text-align:center;font-family:inherit;}
+.tab.active{background:var(--sf);color:var(--tx);box-shadow:var(--sh);}
+.tab:hover:not(.active){color:var(--tx);}
+.section{display:none;}.section.active{display:block;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.card.hl{border-color:var(--gn);border-width:1.5px;}
+.card-sm{padding:12px 14px;}
+label{font-size:12px;color:var(--tx2);font-weight:500;display:block;margin-bottom:5px;}
+select,input[type=text],input[type=number],input[type=url],textarea{width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--bd2);border-radius:var(--rs);background:var(--sf);color:var(--tx);font-family:inherit;transition:border .15s;}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--ac);}
+textarea{resize:vertical;min-height:52px;}
+.g{display:grid;gap:10px;margin-bottom:12px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr;}
+@media(max-width:520px){.g3{grid-template-columns:1fr 1fr;}.g4{grid-template-columns:1fr 1fr;}}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 14px;font-size:13px;font-weight:500;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--sf);color:var(--tx);cursor:pointer;transition:all .15s;font-family:inherit;}
+.btn:hover{background:var(--sf2);}
+.btn-p{background:var(--tx);color:var(--bg);border-color:var(--tx);}
+.btn-p:hover{opacity:.82;}
+.btn-d{color:var(--rd);border-color:var(--rd-bd);}
+.btn-d:hover{background:var(--rd-bg);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:4px;white-space:nowrap;}
+.tag-best{background:var(--gn-bg);color:var(--gn);}
+.tag-val{background:var(--ac-bg);color:var(--ac-tx);}
+.tag-perf{background:var(--am-bg);color:var(--am);}
+.tag-on{background:var(--gn-bg);color:var(--gn);}
+.tag-soon{background:var(--am-bg);color:var(--am);}
+.tag-off{background:var(--sf3);color:var(--tx3);}
+.srow{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.slbl{font-size:11px;color:var(--tx2);width:62px;flex-shrink:0;}
+.bbg{flex:1;height:4px;background:var(--sf2);border-radius:2px;overflow:hidden;}
+.bfill{height:100%;border-radius:2px;transition:width .4s;}
+.snum{font-size:11px;font-weight:600;width:22px;text-align:right;color:var(--tx2);}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pchip{font-size:11px;padding:3px 8px;border-radius:4px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx2);}
+.pchip.low{background:var(--gn-bg);border-color:var(--gn-bd);color:var(--gn);font-weight:600;}
+.mets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.met{background:var(--sf2);border-radius:var(--rs);padding:10px 12px;text-align:center;}
+.met-v{font-size:20px;font-weight:700;}
+.met-l{font-size:11px;color:var(--tx3);margin-top:1px;}
+.verd{border-radius:var(--r);padding:14px 16px;margin-top:12px;}
+.verd-y{background:var(--gn-bg);border:1px solid var(--gn-bd);}
+.verd-n{background:var(--rd-bg);border:1px solid var(--rd-bd);}
+.verd-t{font-size:15px;font-weight:700;margin-bottom:4px;}
+.verd-y .verd-t{color:var(--gn);}
+.verd-n .verd-t{color:var(--rd);}
+.verd-b{font-size:13px;line-height:1.7;}
+.verd-y .verd-b{color:var(--gn);}
+.verd-n .verd-b{color:var(--rd);}
+.reason{background:var(--sf2);border-radius:var(--rs);padding:10px 12px;margin-top:10px;font-size:12px;color:var(--tx2);line-height:1.8;}
+.cmp-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.cmp-t{width:100%;border-collapse:collapse;font-size:12px;min-width:460px;}
+.cmp-t th{text-align:left;padding:9px 10px;font-weight:600;font-size:11px;color:var(--tx3);border-bottom:1px solid var(--bd);background:var(--sf2);white-space:nowrap;}
+.cmp-t td{padding:9px 10px;border-bottom:1px solid var(--bd);vertical-align:middle;}
+.cmp-t tr:last-child td{border-bottom:none;}
+.cmp-t tr.tr-top td{background:color-mix(in srgb,var(--gn-bg) 40%,transparent);}
+.bv{color:var(--gn);font-weight:700;}
+.pref-row{margin-bottom:16px;}
+.ph{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+.ph span:last-child{font-weight:700;color:var(--tx2);}
+input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer;}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.preset{padding:6px 12px;font-size:12px;border-radius:20px;border:1px solid var(--bd2);background:var(--sf2);color:var(--tx2);cursor:pointer;transition:all .15s;font-family:inherit;}
+.preset:hover,.preset.active{background:var(--tx);color:var(--bg);border-color:var(--tx);}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.mo.hidden{display:none;}
+.mo-box{background:var(--sf);border-radius:var(--r);padding:20px;width:100%;max-width:540px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);}
+.mo-box h2{font-size:15px;font-weight:700;margin-bottom:3px;}
+.mo-sub{font-size:12px;color:var(--tx3);margin-bottom:16px;}
+.mo-sec{font-size:12px;font-weight:600;color:var(--tx2);margin:14px 0 10px;padding-top:14px;border-top:1px solid var(--bd);}
+.mo-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--bd);}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 18px;border-radius:20px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+.hint{font-size:11px;color:var(--tx3);line-height:1.6;margin-top:4px;}
+.stitle{font-size:13px;font-weight:600;color:var(--tx2);margin-bottom:12px;}
+.empty{text-align:center;padding:40px 20px;color:var(--tx3);font-size:13px;}
+.irow{display:flex;justify-content:space-between;align-items:center;background:var(--sf2);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;gap:8px;}
+.iname{font-size:13px;font-weight:500;}
+.imeta{font-size:11px;color:var(--tx3);margin-top:2px;}
+.iacts{display:flex;gap:6px;flex-shrink:0;}
+.score-preview{background:var(--gn-bg);border:1px solid var(--gn-bd);border-radius:var(--rs);padding:10px 12px;margin-top:10px;font-size:12px;color:var(--gn);line-height:1.9;}
+hr{border:none;border-top:1px solid var(--bd);margin:14px 0;}
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <div>
-      <h1>🛍 购物决策助手</h1>
-      <p>帮你回答：哪个最适合我，多花的钱值不值</p>
-    </div>
-    <div class="header-right">
-      <span class="count-badge" id="item-count">0 件商品</span>
-    </div>
+    <div><h1>🛍 购物决策助手</h1><p>最适合你 · 是否值得升级</p></div>
+    <span class="badge" id="item-count">0 件商品</span>
   </header>
-
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('recommend',this)">推荐</button>
-    <button class="tab" onclick="switchTab('compare',this)">对比</button>
-    <button class="tab" onclick="switchTab('upgrade',this)">升级分析</button>
-    <button class="tab" onclick="switchTab('prefs',this)">我的偏好</button>
-    <button class="tab" onclick="switchTab('admin',this)">管理商品</button>
+    <button class="tab active" onclick="switchTab('rec',this)">推荐</button>
+    <button class="tab" onclick="switchTab('cmp',this)">对比</button>
+    <button class="tab" onclick="switchTab('upg',this)">升级分析</button>
+    <button class="tab" onclick="switchTab('prc',this)">比价</button>
+    <button class="tab" onclick="switchTab('prf',this)">我的偏好</button>
+    <button class="tab" onclick="switchTab('adm',this)">管理商品</button>
   </div>
 
-  <!-- 推荐 -->
-  <div class="section active" id="tab-recommend">
+  <div class="section active" id="tab-rec">
     <div class="card card-sm">
-      <div class="row row-3">
-        <div>
-          <label>品类</label>
-          <select id="rec-cat" onchange="renderRecommend()"></select>
-        </div>
-        <div>
-          <label>使用场景</label>
-          <select id="rec-use" onchange="renderRecommend()">
-            <option value="daily">日常使用</option>
-            <option value="pro">专业创作</option>
-            <option value="gaming">游戏娱乐</option>
-            <option value="travel">出差旅行</option>
-          </select>
-        </div>
-        <div>
-          <label>预算上限（元）</label>
-          <input type="number" id="rec-budget" value="5000" min="100" step="500" oninput="renderRecommend()">
-        </div>
+      <div class="g g3">
+        <div><label>品类</label><select id="rec-cat" onchange="renderRec()"></select></div>
+        <div><label>预算上限（元）</label><input type="number" id="rec-budget" value="1000" min="50" step="100" oninput="renderRec()"></div>
+        <div style="display:flex;align-items:flex-end"><p class="hint">系统自动匹配最适合你的三款</p></div>
       </div>
     </div>
-    <div id="rec-results"></div>
+    <div id="rec-out"></div>
   </div>
 
-  <!-- 对比 -->
-  <div class="section" id="tab-compare">
+  <div class="section" id="tab-cmp">
     <div class="card card-sm" style="margin-bottom:14px">
-      <div class="row row-2">
-        <div>
-          <label>品类</label>
-          <select id="cmp-cat" onchange="renderCompare()"></select>
-        </div>
-        <div style="display:flex;align-items:flex-end">
-          <p class="hint">★ 标注该维度最优，绿色行为综合推荐</p>
-        </div>
-      </div>
+      <div><label>品类</label><select id="cmp-cat" onchange="renderCmp()"></select></div>
     </div>
-    <div id="cmp-results"></div>
+    <div id="cmp-out"></div>
   </div>
 
-  <!-- 升级分析 -->
-  <div class="section" id="tab-upgrade">
+  <div class="section" id="tab-upg">
     <div class="card card-sm" style="margin-bottom:14px">
-      <div class="row row-2">
-        <div>
-          <label>品类</label>
-          <select id="upg-cat" onchange="fillUpgradeSelects()"></select>
-        </div>
+      <div class="g g2" style="margin-bottom:10px">
+        <div><label>品类</label><select id="upg-cat" onchange="fillUpgSelects()"></select></div>
       </div>
-      <div class="row row-2">
-        <div>
-          <label>我现在用的</label>
-          <select id="upg-from" onchange="renderUpgrade()"></select>
-        </div>
-        <div>
-          <label>想升级到</label>
-          <select id="upg-to" onchange="renderUpgrade()"></select>
-        </div>
+      <div class="g g2" style="margin-bottom:10px">
+        <div><label>我现在用的</label><select id="upg-from" onchange="renderUpg()"></select></div>
+        <div><label>想换到</label><select id="upg-to" onchange="renderUpg()"></select></div>
       </div>
       <div>
-        <label>值得升级的阈值（分/千元）</label>
-        <input type="number" id="upg-thresh" value="0.05" min="0.01" step="0.01" style="width:120px" oninput="renderUpgrade()">
-        <p class="hint">越高越严格。默认 0.05 表示每多花 1000 元至少要提升 0.05 综合分才算值得。</p>
+        <label>值得升级阈值（分/千元）</label>
+        <input type="number" id="upg-thresh" value="0.05" min="0.001" step="0.01" style="width:110px" oninput="renderUpg()">
+        <p class="hint">每多花 1000 元综合分需提升至少这么多才算值得</p>
       </div>
     </div>
-    <div id="upg-results"></div>
+    <div id="upg-out"></div>
   </div>
 
-  <!-- 偏好 -->
-  <div class="section" id="tab-prefs">
+  <div class="section" id="tab-prc">
+    <div class="card card-sm" style="margin-bottom:14px">
+      <div><label>品类</label><select id="prc-cat" onchange="renderPrc()"></select></div>
+    </div>
+    <div id="prc-out"></div>
+  </div>
+
+  <div class="section" id="tab-prf">
     <div class="card">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">设置各维度的优先级权重（1–10），影响推荐、对比、升级分析的综合评分。</p>
-      <div id="pref-sliders"></div>
-      <hr class="divider">
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:12px">选择偏好模式，或手动调整各维度权重：</p>
+      <div class="presets" id="presets-wrap"></div>
+      <div id="prf-sliders"></div>
+      <hr>
       <div style="display:flex;gap:8px;justify-content:flex-end">
         <button class="btn" onclick="resetPrefs()">恢复默认</button>
-        <button class="btn btn-primary" onclick="savePrefs()">保存偏好</button>
+        <button class="btn btn-p" onclick="savePrefs()">保存偏好</button>
       </div>
     </div>
     <div class="card card-sm" style="margin-top:4px">
-      <p class="section-title">算法说明</p>
-      <p style="font-size:12px;color:var(--text2);line-height:1.8">
-        <b>综合评分</b> = 各维度(评分 × 偏好权重)之和 ÷ 权重总和 ÷ 价格效用因子<br>
-        <b>价格效用因子</b> = log₁₀(价格/1000 + 1) × 1.5 + 1（越贵越需要更高分才能胜出）<br>
-        <b>升级价值</b> = 综合分差 ÷ |价格差| × 1000（单位：分/千元）<br>
-        规则完全透明，你的偏好权重决定一切。
+      <p class="stitle">算法说明</p>
+      <p style="font-size:12px;color:var(--tx2);line-height:1.9">
+        <b>自动评分</b>：填入官网客观参数，系统按品类规则换算为 0–10 分，无需手动打分。<br>
+        <b>综合评分</b> = Σ(维度分 × 偏好权重) ÷ 权重总和 ÷ 价格效用因子<br>
+        <b>升级价值</b> = 综合分差 ÷ |价格差| × 1000（分/千元）
       </p>
     </div>
   </div>
 
-  <!-- 管理商品 -->
-  <div class="section" id="tab-admin">
+  <div class="section" id="tab-adm">
     <div class="card card-sm" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-      <div>
-        <p style="font-size:13px;font-weight:600">商品库管理</p>
-        <p class="hint">所有数据保存在本地浏览器，换设备需重新添加。</p>
+      <div><p style="font-size:13px;font-weight:600">商品库</p><p class="hint">数据存本地浏览器，换设备请先导出备份</p></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-sm" onclick="exportData()">导出备份</button>
+        <button class="btn btn-sm" onclick="document.getElementById('imp-file').click()">导入恢复</button>
+        <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(this)">
+        <button class="btn btn-p btn-sm" onclick="openAdd()">＋ 添加商品</button>
       </div>
-      <button class="btn btn-primary" onclick="openAddModal()">＋ 添加商品</button>
     </div>
-    <div id="admin-by-cat"></div>
+    <div id="adm-out"></div>
   </div>
 </div>
 
-<!-- Add/Edit Modal -->
-<div class="modal-overlay hidden" id="modal">
-  <div class="modal">
-    <h2 id="modal-title">添加商品</h2>
-    <div class="row row-2">
-      <div>
-        <label>商品名称 *</label>
-        <input type="text" id="f-name" placeholder="如：MacBook Air M3">
-      </div>
-      <div>
-        <label>品类 *</label>
-        <input type="text" id="f-cat" placeholder="如：笔记本电脑">
-      </div>
-    </div>
-    <div class="row row-2">
-      <div>
-        <label>参考价格（元）*</label>
-        <input type="number" id="f-price" placeholder="9499" min="1">
-      </div>
-      <div>
-        <label>生命周期状态</label>
-        <select id="f-status">
-          <option value="active">在售</option>
-          <option value="eol-soon">即将停产</option>
-          <option value="eol">已停产</option>
+<!-- Modal -->
+<div class="mo hidden" id="modal">
+  <div class="mo-box">
+    <h2 id="mo-title">添加商品</h2>
+    <p class="mo-sub">填入官网参数，系统自动计算各维度评分</p>
+    <div class="g g2">
+      <div><label>商品名称 *</label><input type="text" id="f-name" placeholder="如：Decathlon UPF50+防晒衣"></div>
+      <div><label>品类 *</label>
+        <select id="f-cat" onchange="buildParamFields()">
+          <option>公路车</option>
+          <option>意式浓缩机</option>
+          <option>全自动咖啡机</option>
+          <option>手冲/滴滤机</option>
+          <option>防晒衣</option>
         </select>
       </div>
     </div>
-    <div style="margin-bottom:10px">
-      <label>备注（可选）</label>
-      <textarea id="f-note" placeholder="产品特色、购买建议等"></textarea>
+    <div class="g g3">
+      <div><label>价格（元）*</label><input type="number" id="f-price" placeholder="299" min="1" oninput="updatePreview()"></div>
+      <div><label>状态</label>
+        <select id="f-status"><option value="active">在售</option><option value="eol-soon">即将停产</option><option value="eol">已停产</option></select>
+      </div>
+      <div><label>图片链接（可选）</label><input type="url" id="f-img" placeholder="https://..."></div>
     </div>
-    <hr class="divider">
-    <p style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">各维度评分（0–10）</p>
-    <div class="score-grid" id="score-grid"></div>
-    <div class="modal-footer">
+    <div style="margin-bottom:10px"><label>备注</label><textarea id="f-note" placeholder="使用感受、特色等"></textarea></div>
+    <p class="mo-sec">各平台价格（可选）</p>
+    <div class="g g4">
+      <div><label>京东</label><input type="number" id="fp-jd" placeholder="—" min="0"></div>
+      <div><label>淘宝</label><input type="number" id="fp-tb" placeholder="—" min="0"></div>
+      <div><label>拼多多</label><input type="number" id="fp-pdd" placeholder="—" min="0"></div>
+      <div><label>抖音商城</label><input type="number" id="fp-dy" placeholder="—" min="0"></div>
+    </div>
+    <p class="mo-sec">品类参数 <span style="font-weight:400;color:var(--tx3)">— 不知道可留空，系统用中间值处理</span></p>
+    <div id="param-fields"></div>
+    <div id="score-preview" style="display:none" class="score-preview"></div>
+    <div class="mo-ft">
       <button class="btn" onclick="closeModal()">取消</button>
-      <button class="btn btn-primary" onclick="saveItem()">保存</button>
+      <button class="btn btn-p" onclick="saveItem()">保存</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── Data ────────────────────────────────────────────────────────────────────
-const DIMS = {
-  perf:        { label: '性能', color: '#16a34a' },
-  battery:     { label: '续航', color: '#2563eb' },
-  portability: { label: '便携', color: '#7c3aed' },
-  display:     { label: '屏幕/音质', color: '#d97706' },
-  value:       { label: '性价比', color: '#db2777' },
+// ── SCHEMAS ──────────────────────────────────────────────────────
+const SCHEMAS = {
+
+  '公路车': {
+    dims: ['性能','轻量','耐用性','性价比'],
+    colors: {'性能':'#15803d','轻量':'#1d4ed8','耐用性':'#b45309','性价比':'#db2777'},
+    weightKeys: {'性能':'perf','轻量':'portable','耐用性':'quality','性价比':'value'},
+    params: [
+      {key:'weight', label:'整车重量（kg）', ph:'8.5', hint:'越轻越好，竞赛车约7kg，入门约10kg'},
+      {key:'gears', label:'变速总级数', ph:'22', hint:'如11速×2盘=22；越多通常越好'},
+      {key:'frame', label:'车架材质', type:'sel', opts:['碳纤维','铝合金（高端）','铝合金（标准）','钢']},
+      {key:'groupset', label:'套件等级', type:'sel', opts:['Dura-Ace/Red','Ultegra/Force','105/Rival','Tiagra/Claris','入门/无品牌'], hint:'变速系统等级'},
+      {key:'wheelset', label:'轮组等级', type:'sel', opts:['碳纤维轮组','铝合金高端','铝合金标准','入门轮组']},
+    ],
+    score(p, price) {
+      const gsS={'Dura-Ace/Red':10,'Ultegra/Force':8,'105/Rival':6.5,'Tiagra/Claris':5,'入门/无品牌':3};
+      const frS={'碳纤维':10,'铝合金（高端）':7,'铝合金（标准）':5,'钢':3};
+      const wlS={'碳纤维轮组':9,'铝合金高端':7,'铝合金标准':5,'入门轮组':3};
+      const gs=gsS[p.groupset]??5, fr=frS[p.frame]??5, wl=wlS[p.wheelset]??5;
+      const gearS=p.gears?Math.min(10,(p.gears-14)/18*10):5;
+      const perf=gs*0.6+gearS*0.4;
+      const weightS=p.weight?Math.max(0,Math.min(10,(11-p.weight)/4*10)):5;
+      const light=weightS*0.5+fr*0.3+wl*0.2;
+      const dur=Math.min(10,fr*0.5+gs*0.3+wl*0.2);
+      const raw=(perf+light+dur)/3;
+      const pf=Math.log10((price||3000)/1000+1)*4;
+      const val=Math.min(10,raw/pf*3);
+      return {'性能':+perf.toFixed(1),'轻量':+light.toFixed(1),'耐用性':+dur.toFixed(1),'性价比':+val.toFixed(1)};
+    }
+  },
+
+  '意式浓缩机': {
+    dims: ['萃取质量','功能性','易用性','性价比'],
+    colors: {'萃取质量':'#15803d','功能性':'#b45309','易用性','#6d28d9','易用性':'#6d28d9','性价比':'#db2777'},
+    weightKeys: {'萃取质量':'perf','功能性':'quality','易用性':'quality','性价比':'value'},
+    params: [
+      {key:'pressure', label:'最大压力（bar）', ph:'15', hint:'9bar是标准，15bar以上更常见'},
+      {key:'boiler', label:'锅炉类型', type:'sel', opts:['双锅炉','热交换锅炉','单锅炉（大）','单锅炉（小）'], hint:'双锅炉可同时萃取+蒸奶'},
+      {key:'pid', label:'PID精准控温', type:'sel', opts:['有','无'], hint:'有PID温度更稳定'},
+      {key:'grinder', label:'内置磨豆机', type:'sel', opts:['有（锥刀）','有（平刀）','无']},
+      {key:'preinfusion', label:'预浸泡', type:'sel', opts:['自动','手动','无'], hint:'预浸泡让萃取更均匀'},
+      {key:'steam', label:'蒸汽棒', type:'sel', opts:['专业蒸汽棒','自动奶泡','Panarello棒','无']},
+    ],
+    score(p, price) {
+      const blrS={'双锅炉':10,'热交换锅炉':7.5,'单锅炉（大）':5.5,'单锅炉（小）':3.5};
+      const pidS={'有':10,'无':5};
+      const preS={'自动':10,'手动':7,'无':4};
+      const grS={'有（锥刀）':10,'有（平刀）':8,'无':3};
+      const stS={'专业蒸汽棒':10,'自动奶泡':7,'Panarello棒':5,'无':2};
+      const pressS=p.pressure?Math.min(10,3+(p.pressure-9)*0.7):6;
+      const ext=(blrS[p.boiler]??5)*0.35+(pidS[p.pid]??7)*0.3+pressS*0.2+(preS[p.preinfusion]??4)*0.15;
+      const func=(grS[p.grinder]??3)*0.4+(stS[p.steam]??5)*0.3+(preS[p.preinfusion]??4)*0.3;
+      const ease=Math.min(10,4+(grS[p.grinder]??3===3?0:2)+(blrS[p.boiler]??5>7?1:0));
+      const raw=(ext+func+ease)/3;
+      const pf=Math.log10((price||3000)/1000+1)*3.5;
+      const val=Math.min(10,raw/pf*3);
+      return {'萃取质量':+Math.min(10,ext).toFixed(1),'功能性':+Math.min(10,func).toFixed(1),'易用性':+Math.min(10,ease).toFixed(1),'性价比':+val.toFixed(1)};
+    }
+  },
+
+  '全自动咖啡机': {
+    dims: ['咖啡质量','易用性','功能性','性价比'],
+    colors: {'咖啡质量':'#15803d','易用性':'#6d28d9','功能性':'#b45309','性价比':'#db2777'},
+    weightKeys: {'咖啡质量':'perf','易用性':'quality','功能性':'quality','性价比':'value'},
+    params: [
+      {key:'grinder', label:'磨豆机类型', type:'sel', opts:['陶瓷锥刀','金属锥刀','钢刀','无/胶囊'], hint:'锥刀研磨更均匀'},
+      {key:'drinks', label:'饮品种类数', ph:'6', hint:'能制作的饮品类型数量'},
+      {key:'screen', label:'操控方式', type:'sel', opts:['彩色触摸屏','单色触摸屏','旋钮+按键','纯按键']},
+      {key:'milk', label:'奶泡系统', type:'sel', opts:['全自动（一键拿铁）','半自动蒸汽棒','无']},
+      {key:'clean', label:'自动清洁', type:'sel', opts:['全自动','半自动','手动']},
+    ],
+    score(p, price) {
+      const grS={'陶瓷锥刀':10,'金属锥刀':8,'钢刀':6,'无/胶囊':3};
+      const scS={'彩色触摸屏':10,'单色触摸屏':7,'旋钮+按键':6,'纯按键':4};
+      const mlS={'全自动（一键拿铁）':10,'半自动蒸汽棒':6,'无':2};
+      const clS={'全自动':10,'半自动':6,'手动':3};
+      const dkS=p.drinks?Math.min(10,2+p.drinks*0.9):5;
+      const qual=(grS[p.grinder]??5)*0.5+dkS*0.3+(mlS[p.milk]??2)*0.2;
+      const ease=(scS[p.screen]??5)*0.4+(clS[p.clean]??5)*0.4+(mlS[p.milk]??2)*0.2;
+      const func=dkS*0.4+(mlS[p.milk]??2)*0.3+(clS[p.clean]??5)*0.3;
+      const raw=(qual+ease+func)/3;
+      const pf=Math.log10((price||2000)/1000+1)*3.5;
+      const val=Math.min(10,raw/pf*3);
+      return {'咖啡质量':+Math.min(10,qual).toFixed(1),'易用性':+Math.min(10,ease).toFixed(1),'功能性':+Math.min(10,func).toFixed(1),'性价比':+val.toFixed(1)};
+    }
+  },
+
+  '手冲/滴滤机': {
+    dims: ['萃取质量','易用性','便携性','性价比'],
+    colors: {'萃取质量':'#15803d','易用性':'#6d28d9','便携性':'#1d4ed8','性价比':'#db2777'},
+    weightKeys: {'萃取质量':'perf','易用性':'quality','便携性':'portable','性价比':'value'},
+    params: [
+      {key:'type', label:'类型', type:'sel', opts:['电动手冲一体机','手动手冲壶','滴滤咖啡机','胶囊机','摩卡壶']},
+      {key:'temp', label:'温控', type:'sel', opts:['精确PID','可调段位','固定温度','无控温'], hint:'水温影响萃取风味'},
+      {key:'filter', label:'滤杯类型', type:'sel', opts:['锥形滤纸','梯形滤纸','金属滤网','胶囊']},
+      {key:'capacity', label:'容量（ml）', ph:'500'},
+    ],
+    score(p, price) {
+      const tpS={'电动手冲一体机':9,'手动手冲壶':8,'滴滤咖啡机':7,'胶囊机':5,'摩卡壶':7};
+      const tmS={'精确PID':10,'可调段位':7,'固定温度':5,'无控温':3};
+      const flS={'锥形滤纸':9,'梯形滤纸':7,'金属滤网':8,'胶囊':5};
+      const ptS={'手动手冲壶':9,'摩卡壶':8,'胶囊机':7,'滴滤咖啡机':5,'电动手冲一体机':6};
+      const capS=p.capacity?Math.min(10,3+p.capacity/100):5;
+      const qual=(tpS[p.type]??5)*0.3+(tmS[p.temp]??5)*0.4+(flS[p.filter]??6)*0.3;
+      const ease=(tpS[p.type]??5)*0.5+(tmS[p.temp]??5)*0.3+capS*0.2;
+      const port=(ptS[p.type]??6)*0.7+capS*0.3;
+      const raw=(qual+ease+port)/3;
+      const pf=Math.log10((price||500)/1000+1)*4;
+      const val=Math.min(10,raw/pf*3);
+      return {'萃取质量':+Math.min(10,qual).toFixed(1),'易用性':+Math.min(10,ease).toFixed(1),'便携性':+Math.min(10,port).toFixed(1),'性价比':+val.toFixed(1)};
+    }
+  },
+
+  '防晒衣': {
+    dims: ['活动性','透气性','耐用性','防护力','性价比'],
+    colors: {'活动性':'#15803d','透气性':'#1d4ed8','耐用性':'#b45309','防护力':'#6d28d9','性价比':'#db2777'},
+    weightKeys: {'活动性':'perf','透气性':'portable','耐用性':'quality','防护力':'quality','性价比':'value'},
+    params: [
+      {key:'stretch', label:'弹性类型', type:'sel', opts:['四向弹力','双向弹力','微弹','无弹性'], hint:'户外作业推荐四向弹，活动最自由'},
+      {key:'weight', label:'面料克重（g/㎡）', ph:'85', hint:'越低越透气，80以下凉感佳，120以上更耐磨'},
+      {key:'material', label:'主要面料', type:'sel', opts:['尼龙','涤纶','尼龙+氨纶','涤纶+氨纶','棉'], hint:'尼龙最耐磨，涤纶轻盈，加氨纶弹性好'},
+      {key:'upf', label:'UPF指数', type:'sel', opts:['UPF50+','UPF40+','UPF30+','未标注'], hint:'户外工作建议UPF50+'},
+      {key:'mosquito', label:'防蚊处理', type:'sel', opts:['有防蚊涂层','物理防蚊（密织）','无'], hint:'有防蚊处理户外作业更舒适'},
+      {key:'mesh', label:'腋下/背部网眼', type:'sel', opts:['大面积网眼','局部网眼','无网眼'], hint:'网眼区域散热快'},
+      {key:'waterproof', label:'防水处理', type:'sel', opts:['DWR防泼水','防水涂层','无'], hint:'防泼水对应对汗水和小雨有用'},
+    ],
+    score(p, price) {
+      const stS={'四向弹力':10,'双向弹力':7,'微弹':5,'无弹性':2};
+      const mtS={'尼龙':8,'涤纶':7,'尼龙+氨纶':10,'涤纶+氨纶':9,'棉':4};
+      const mqS={'有防蚊涂层':10,'物理防蚊（密织）':7,'无':2};
+      const mshS={'大面积网眼':10,'局部网眼':6,'无网眼':3};
+      const upfS={'UPF50+':10,'UPF40+':7,'UPF30+':5,'未标注':2};
+      const wpS={'DWR防泼水':8,'防水涂层':6,'无':3};
+      // 活动性：弹性最重要
+      const agile=(stS[p.stretch]??5)*0.7+(mtS[p.material]??7)*0.3;
+      // 透气性：克重+网眼
+      const wgS=p.weight?Math.max(0,Math.min(10,(150-p.weight)/70*10)):5;
+      const breath=wgS*0.6+(mshS[p.mesh]??5)*0.4;
+      // 耐用性：面料+防水
+      const dur=(mtS[p.material]??7)*0.5+(wpS[p.waterproof]??4)*0.3+(stS[p.stretch]??5)*0.2;
+      // 防护力：防晒+防蚊
+      const protect=(upfS[p.upf]??5)*0.5+(mqS[p.mosquito]??2)*0.5;
+      const raw=(agile+breath+dur+protect)/4;
+      const pf=Math.log10((price||200)/100+1)*3;
+      const val=Math.min(10,raw/pf*2.5);
+      return {'活动性':+Math.min(10,agile).toFixed(1),'透气性':+Math.min(10,breath).toFixed(1),'耐用性':+Math.min(10,dur).toFixed(1),'防护力':+Math.min(10,protect).toFixed(1),'性价比':+val.toFixed(1)};
+    }
+  }
 };
-const DIM_KEYS = Object.keys(DIMS);
 
-const DEFAULT_PREFS = { perf:7, battery:6, portability:5, display:5, value:8 };
+// ── WEIGHTS / PREFS ──────────────────────────────────────────────
+const PRESETS=[
+  {label:'均衡',w:{perf:6,value:6,quality:6,portable:6}},
+  {label:'性能优先',w:{perf:10,value:3,quality:7,portable:4}},
+  {label:'性价比优先',w:{perf:5,value:10,quality:5,portable:5}},
+  {label:'耐用优先',w:{perf:5,value:5,quality:10,portable:5}},
+];
+const DIM_KEY_MAP={'性能':'perf','活动性':'perf','萃取质量':'perf','咖啡质量':'perf','轻量':'portable','便携性':'portable','透气性':'portable','耐用性':'quality','功能性':'quality','易用性':'quality','防护力':'quality','性价比':'value'};
+const DEF_W={perf:7,value:8,quality:6,portable:5};
+const W_LABELS={perf:'性能/活动性',value:'性价比',quality:'耐用/功能/防护',portable:'轻量/透气/便携'};
 
-const SAMPLE_ITEMS = [
-  { id:'s1', name:'MacBook Air M3', cat:'笔记本电脑', price:9499, status:'active', note:'轻薄长续航，M3芯片综合性能优秀', scores:{perf:8.5,battery:9,portability:9,display:8,value:6}, updated:'2025-01' },
-  { id:'s2', name:'ThinkPad X1 Carbon', cat:'笔记本电脑', price:8999, status:'active', note:'商务旗舰，键盘手感最佳', scores:{perf:7.5,battery:8,portability:8.5,display:7.5,value:6.5}, updated:'2025-01' },
-  { id:'s3', name:'小米笔记本 Pro 14', cat:'笔记本电脑', price:4999, status:'active', note:'高性价比，屏幕素质突出', scores:{perf:7,battery:7.5,portability:8,display:8,value:8.5}, updated:'2025-01' },
-  { id:'s4', name:'联想 Y9000P', cat:'笔记本电脑', price:7499, status:'active', note:'游戏性能强悍，散热优秀', scores:{perf:9.5,battery:5,portability:5,display:8.5,value:7}, updated:'2025-01' },
-  { id:'s5', name:'荣耀 MagicBook 14', cat:'笔记本电脑', price:3999, status:'active', note:'入门轻薄本性价比首选', scores:{perf:6.5,battery:8,portability:8.5,display:7,value:9}, updated:'2025-01' },
-  { id:'s6', name:'iPhone 16 Pro', cat:'手机', price:8999, status:'active', note:'iOS生态最强，拍照顶级', scores:{perf:9.5,battery:7.5,portability:7,display:9.5,value:6}, updated:'2025-01' },
-  { id:'s7', name:'小米 15 Pro', cat:'手机', price:5999, status:'active', note:'安卓旗舰综合均衡', scores:{perf:8.5,battery:8.5,portability:7.5,display:9,value:7.5}, updated:'2025-01' },
-  { id:'s8', name:'一加 13', cat:'手机', price:4499, status:'active', note:'超大电池，快充最强', scores:{perf:8.5,battery:9,portability:7.5,display:8.5,value:8.5}, updated:'2025-01' },
-  { id:'s9', name:'Sony WH-1000XM5', cat:'耳机', price:2799, status:'active', note:'降噪业界标杆', scores:{perf:9,battery:8.5,portability:7.5,display:9,value:7}, updated:'2025-01' },
-  { id:'s10', name:'AirPods Pro 2', cat:'耳机', price:1899, status:'active', note:'iOS生态最无缝，小巧便携', scores:{perf:8,battery:7,portability:9.5,display:8,value:7.5}, updated:'2025-01' },
-  { id:'s11', name:'1MORE SonoFlow Pro', cat:'耳机', price:699, status:'active', note:'国产高性价比，音质超越同价位', scores:{perf:7,battery:8.5,portability:7.5,display:7,value:9.5}, updated:'2025-01' },
+function loadW(){const r=localStorage.getItem('w4');return r?JSON.parse(r):{...DEF_W};}
+function saveW(w){localStorage.setItem('w4',JSON.stringify(w));}
+
+let W=loadW();
+
+// ── DATA ─────────────────────────────────────────────────────────
+const SAMPLE=[
+  {id:'r1',name:'捷安特 TCR Advanced 2',cat:'公路车',price:8500,status:'active',note:'铝车架竞速入门',img:'',prices:{jd:8500,tb:8300,pdd:8100,dy:null},updated:'2026-05',params:{weight:8.7,gears:22,frame:'铝合金（高端）',groupset:'105/Rival',wheelset:'铝合金高端'}},
+  {id:'r2',name:'Trek Émonda SL 5',cat:'公路车',price:12800,status:'active',note:'碳纤维轻量爬坡',img:'',prices:{jd:12800,tb:12500,pdd:null,dy:null},updated:'2026-05',params:{weight:7.5,gears:22,frame:'碳纤维',groupset:'105/Rival',wheelset:'铝合金高端'}},
+  {id:'r3',name:'美利达 Scultura 400',cat:'公路车',price:4200,status:'active',note:'入门竞速性价比高',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:3950},updated:'2026-05',params:{weight:9.5,gears:16,frame:'铝合金（标准）',groupset:'Tiagra/Claris',wheelset:'铝合金标准'}},
+  {id:'c1',name:'德龙 Dedica EC685',cat:'意式浓缩机',price:999,status:'active',note:'入门意式小巧便宜',img:'',prices:{jd:999,tb:899,pdd:849,dy:929},updated:'2026-05',params:{pressure:15,boiler:'单锅炉（小）',pid:'无',grinder:'无',preinfusion:'无',steam:'Panarello棒'}},
+  {id:'c2',name:'Breville Barista Express',cat:'意式浓缩机',price:4200,status:'active',note:'内置磨豆机一体机',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:null},updated:'2026-05',params:{pressure:15,boiler:'单锅炉（大）',pid:'有',grinder:'有（锥刀）',preinfusion:'手动',steam:'专业蒸汽棒'}},
+  {id:'s1',name:'迪卡侬 UV Protect',cat:'防晒衣',price:149,status:'active',note:'基础款性价比高',img:'',prices:{jd:149,tb:139,pdd:129,dy:135},updated:'2026-05',params:{stretch:'双向弹力',weight:110,material:'涤纶',upf:'UPF50+',mosquito:'无',mesh:'局部网眼',waterproof:'无'}},
+  {id:'s2',name:'蕉下 轻弹系列防晒衣',cat:'防晒衣',price:299,status:'active',note:'轻薄弹力，品牌口碑好',img:'',prices:{jd:299,tb:279,pdd:259,dy:269},updated:'2026-05',params:{stretch:'四向弹力',weight:88,material:'尼龙+氨纶',upf:'UPF50+',mosquito:'无',mesh:'局部网眼',waterproof:'DWR防泼水'}},
+  {id:'s3',name:'牧高笛 防晒防蚊衣',cat:'防晒衣',price:199,status:'active',note:'户外专业款，有防蚊处理',img:'',prices:{jd:199,tb:189,pdd:179,dy:185},updated:'2026-05',params:{stretch:'双向弹力',weight:95,material:'尼龙',upf:'UPF50+',mosquito:'物理防蚊（密织）',mesh:'局部网眼',waterproof:'DWR防泼水'}},
 ];
 
-function loadData() {
-  const raw = localStorage.getItem('shopping_items');
-  if (raw) return JSON.parse(raw);
-  localStorage.setItem('shopping_items', JSON.stringify(SAMPLE_ITEMS));
-  return SAMPLE_ITEMS;
+function loadItems(){const r=localStorage.getItem('items_v4');if(r)return JSON.parse(r);localStorage.setItem('items_v4',JSON.stringify(SAMPLE));return SAMPLE;}
+function saveItems(d){localStorage.setItem('items_v4',JSON.stringify(d));}
+
+let items=loadItems();
+
+// ── SCORING ──────────────────────────────────────────────────────
+function schema(cat){return SCHEMAS[cat]||SCHEMAS['公路车'];}
+function autoScore(item){return schema(item.cat).score(item.params||{},item.price);}
+function dimW(dimLabel){const k=DIM_KEY_MAP[dimLabel]||'perf';return W[k]||5;}
+function finalScore(item){
+  const sc=autoScore(item);
+  const dims=Object.keys(sc);
+  let ws=0,wsc=0;
+  dims.forEach(d=>{const w=dimW(d);ws+=w;wsc+=sc[d]*w;});
+  const raw=wsc/ws;
+  const pf=Math.log10(item.price/1000+1)*1.5+1;
+  return+(raw/pf*2.5).toFixed(2);
 }
-function saveData(items) {
-  localStorage.setItem('shopping_items', JSON.stringify(items));
-}
-function loadPrefs() {
-  const raw = localStorage.getItem('shopping_prefs');
-  return raw ? JSON.parse(raw) : { ...DEFAULT_PREFS };
-}
-function savePrefsData(p) {
-  localStorage.setItem('shopping_prefs', JSON.stringify(p));
+function lowPrice(item){if(!item.prices)return null;const v=Object.values(item.prices).filter(x=>x&&x>0);return v.length?Math.min(...v):null;}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+const PLAT={jd:'京东',tb:'淘宝',pdd:'拼多多',dy:'抖音'};
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200);}
+function stag(s){if(s==='eol')return'<span class="tag tag-off">已停产</span>';if(s==='eol-soon')return'<span class="tag tag-soon">即将停产</span>';return'<span class="tag tag-on">在售</span>';}
+function getCats(){return[...new Set(items.map(i=>i.cat))];}
+function byCat(c){return items.filter(i=>i.cat===c);}
+function fillSel(id){const s=document.getElementById(id);if(!s)return;const cats=getCats(),prev=s.value;s.innerHTML=cats.map(c=>`<option>${c}</option>`).join('');if(cats.includes(prev))s.value=prev;}
+function fillAll(){['rec-cat','cmp-cat','upg-cat','prc-cat'].forEach(fillSel);}
+function updCount(){document.getElementById('item-count').textContent=items.length+' 件商品';}
+
+function chips(item){
+  if(!item.prices||!Object.values(item.prices).some(v=>v&&v>0))return'';
+  const lp=lowPrice(item);
+  return'<div class="pchips">'+Object.entries(PLAT).map(([k,l])=>{const v=item.prices[k];if(!v||v<=0)return'';return`<span class="pchip${v===lp?' low':''}">${l} ¥${v.toLocaleString()}${v===lp?' ★':''}</span>`;}).join('')+'</div>';
 }
 
-let items = loadData();
-let prefs = loadPrefs();
-
-function getCategories() {
-  return [...new Set(items.map(i => i.cat))];
-}
-function getItemsByCat(cat) {
-  return items.filter(i => i.cat === cat);
+function bars(item){
+  const sc=schema(item.cat),scores=autoScore(item);
+  return sc.dims.map(d=>{
+    const v=scores[d]??5,c=sc.colors[d]||'#6b6960';
+    return`<div class="srow"><span class="slbl">${d}</span><div class="bbg"><div class="bfill" style="width:${v*10}%;background:${c}"></div></div><span class="snum">${v}</span></div>`;
+  }).join('');
 }
 
-// ─── Scoring ─────────────────────────────────────────────────────────────────
-function calcScore(item) {
-  const totalW = DIM_KEYS.reduce((s, k) => s + prefs[k], 0);
-  const weighted = DIM_KEYS.reduce((s, k) => s + (item.scores[k] || 0) * prefs[k], 0);
-  const raw = weighted / totalW;
-  const priceFactor = Math.log10(item.price / 1000 + 1) * 1.5 + 1;
-  return +(raw / priceFactor * 2.5).toFixed(2);
-}
-function calcRawScore(item) {
-  const totalW = DIM_KEYS.reduce((s, k) => s + prefs[k], 0);
-  return +(DIM_KEYS.reduce((s, k) => s + (item.scores[k] || 0) * prefs[k], 0) / totalW).toFixed(2);
-}
-
-// ─── UI Helpers ───────────────────────────────────────────────────────────────
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
-}
-function switchTab(id, btn) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('tab-' + id).classList.add('active');
-  btn.classList.add('active');
-  if (id === 'recommend') renderRecommend();
-  if (id === 'compare') renderCompare();
-  if (id === 'upgrade') { fillCatSelects('upg-cat'); fillUpgradeSelects(); }
-  if (id === 'admin') renderAdmin();
-}
-function fillCatSelect(id) {
-  const sel = document.getElementById(id);
-  const cats = getCategories();
-  const prev = sel.value;
-  sel.innerHTML = cats.map(c => `<option value="${c}">${c}</option>`).join('');
-  if (cats.includes(prev)) sel.value = prev;
-}
-function fillCatSelects(...ids) {
-  ids.forEach(fillCatSelect);
-}
-function updateItemCount() {
-  document.getElementById('item-count').textContent = items.length + ' 件商品';
-}
-function statusTag(status) {
-  if (status === 'eol') return '<span class="tag tag-eol">已停产</span>';
-  if (status === 'eol-soon') return '<span class="tag tag-eol-soon">即将停产</span>';
-  return '<span class="tag tag-active">在售</span>';
-}
-
-// ─── Recommend ────────────────────────────────────────────────────────────────
-function renderRecommend() {
-  fillCatSelect('rec-cat');
-  const cat = document.getElementById('rec-cat').value;
-  const use = document.getElementById('rec-use').value;
-  const budget = +document.getElementById('rec-budget').value;
-  const pool = getItemsByCat(cat).filter(i => i.price <= budget * 1.2 && i.status !== 'eol');
-  const el = document.getElementById('rec-results');
-  if (!pool.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">🔍</div>预算范围内暂无商品，请提高预算或添加商品</div>';
-    return;
-  }
-  const scored = pool.map(i => ({ ...i, final: calcScore(i) })).sort((a, b) => b.final - a.final);
-  const bestValue = [...pool].sort((a, b) => calcRawScore(b) / b.price - calcRawScore(a) / a.price)[0];
-  const bestPerf = [...pool].sort((a, b) => b.scores.perf - a.scores.perf)[0];
-
-  // use-case bonus dim
-  const useDims = { daily:['battery','portability'], pro:['perf','display'], gaming:['perf','display'], travel:['portability','battery'] };
-  const bonus = useDims[use] || [];
-
-  const picks = [];
-  const seen = new Set();
-  const add = (item, tag, tagClass, reason) => {
-    if (!seen.has(item.id)) { seen.add(item.id); picks.push({ item, tag, tagClass, reason }); }
-  };
-  add(scored[0], '最适合你', 'tag-best', makeReason(scored[0], bonus, use));
-  add(bestValue, '性价比最高', 'tag-value', '单位价格换来的加权分最高，适合预算敏感型选择。');
-  add(bestPerf, '性能最强', 'tag-perf', `性能评分 ${bestPerf.scores.perf}/10，预算内硬实力最强。`);
-
-  el.innerHTML = picks.map(({ item, tag, tagClass, reason }) => `
-    <div class="card ${tag === '最适合你' ? 'highlight' : ''}">
+// ── RECOMMEND ─────────────────────────────────────────────────────
+function renderRec(){
+  fillSel('rec-cat');
+  const cat=document.getElementById('rec-cat').value;
+  const budget=+document.getElementById('rec-budget').value;
+  const pool=byCat(cat).filter(i=>i.price<=budget*1.2&&i.status!=='eol');
+  const el=document.getElementById('rec-out');
+  if(!pool.length){el.innerHTML='<div class="empty">预算内暂无商品，请提高预算或在「管理商品」添加</div>';return;}
+  const sc=pool.map(i=>({...i,_f:finalScore(i)})).sort((a,b)=>b._f-a._f);
+  const sch=schema(cat);
+  const perfDim=sch.dims[0];
+  const bestPerf=[...pool].sort((a,b)=>(autoScore(b)[perfDim]||0)-(autoScore(a)[perfDim]||0))[0];
+  const bestVal=[...pool].sort((a,b)=>{
+    const sa=autoScore(a),sb=autoScore(b);
+    const avg=s=>Object.values(s).reduce((x,y)=>x+y,0)/Object.values(s).length;
+    return avg(sb)/b.price-avg(sa)/a.price;
+  })[0];
+  const picks=[];const seen=new Set();
+  const add=(item,tag,cls,reason)=>{if(!seen.has(item.id)){seen.add(item.id);picks.push({item,tag,cls,reason});}};
+  add(sc[0],'最适合你','tag-best',`综合你的偏好权重评分最高（${sc[0]._f}/10），最符合你的需求。`);
+  add(bestVal,'性价比最高','tag-val','每元获得的综合评分最高，花最少的钱得到最多。');
+  add(bestPerf,perfDim+'最强','tag-perf',`${perfDim}评分 ${(autoScore(bestPerf)[perfDim]||0)}/10，该品类这项指标最强。`);
+  el.innerHTML=picks.map(({item,tag,cls,reason})=>`
+    <div class="card ${tag==='最适合你'?'hl':''}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:12px;flex-wrap:wrap">
         <div>
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
-            <span style="font-size:15px;font-weight:600">${item.name}</span>
-            ${statusTag(item.status)}
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+            <span style="font-size:15px;font-weight:700">${item.name}</span>
+            <span class="tag ${cls}">${tag}</span>${stag(item.status)}
           </div>
-          <div class="price-main">¥${item.price.toLocaleString()}</div>
-          ${item.updated ? `<div class="price-updated">价格更新：${item.updated}</div>` : ''}
+          <div style="font-size:20px;font-weight:700">¥${item.price.toLocaleString()}</div>
+          ${chips(item)}
+          ${item.updated?`<div style="font-size:11px;color:var(--tx3);margin-top:4px">价格更新：${item.updated}</div>`:''}
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <span class="tag ${tagClass}">${tag}</span>
-          <div style="font-size:22px;font-weight:700;margin-top:6px;color:${tag === '最适合你' ? 'var(--green)' : 'var(--text)'}">${calcScore(item)}</div>
-          <div style="font-size:11px;color:var(--text3)">综合评分</div>
+          <div style="font-size:28px;font-weight:800;color:${tag==='最适合你'?'var(--gn)':'var(--tx)'}">${finalScore(item)}</div>
+          <div style="font-size:11px;color:var(--tx3)">综合评分</div>
         </div>
       </div>
-      ${DIM_KEYS.map(k => `
-        <div class="score-row">
-          <span class="score-lbl">${DIMS[k].label}</span>
-          <div class="bar-bg"><div class="bar-fill" style="width:${item.scores[k]*10}%;background:${DIMS[k].color}"></div></div>
-          <span class="score-num">${item.scores[k]}</span>
-        </div>`).join('')}
-      <div class="reason">${reason}${item.note ? '<br><span style="color:var(--text3)">💬 '+item.note+'</span>' : ''}</div>
+      ${bars(item)}
+      <div class="reason">${reason}${item.note?'<br><span style="color:var(--tx3)">💬 '+item.note+'</span>':''}</div>
     </div>`).join('');
 }
 
-function makeReason(item, bonus, use) {
-  const useLabel = { daily:'日常使用', pro:'专业创作', gaming:'游戏娱乐', travel:'出差旅行' }[use] || use;
-  const topDims = [...DIM_KEYS].sort((a, b) => prefs[b] * (bonus.includes(b)?1.5:1) - prefs[a] * (bonus.includes(a)?1.5:1)).slice(0, 2);
-  return `针对「${useLabel}」场景，综合你的偏好权重，${topDims.map(k => DIMS[k].label + '(' + item.scores[k] + '/10)').join('、')} 表现突出，最终得分 ${calcScore(item)}/10。`;
-}
-
-// ─── Compare ──────────────────────────────────────────────────────────────────
-function renderCompare() {
-  fillCatSelect('cmp-cat');
-  const cat = document.getElementById('cmp-cat').value;
-  const pool = getItemsByCat(cat);
-  const el = document.getElementById('cmp-results');
-  if (!pool.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📊</div>该品类暂无商品</div>';
-    return;
-  }
-  const scored = pool.map(i => ({ ...i, final: calcScore(i) })).sort((a, b) => b.final - a.final);
-  const bestPer = {};
-  DIM_KEYS.forEach(k => { bestPer[k] = Math.max(...pool.map(i => i.scores[k] || 0)); });
-  const bestFinal = Math.max(...scored.map(i => i.final));
-
-  el.innerHTML = `<div class="card" style="padding:12px">
-    <div class="cmp-wrap">
-      <table class="cmp-table">
-        <thead><tr>
-          <th>型号</th>
-          <th>状态</th>
-          <th>价格</th>
-          <th>综合分</th>
-          ${DIM_KEYS.map(k => `<th style="color:${DIMS[k].color}">${DIMS[k].label}</th>`).join('')}
-        </tr></thead>
-        <tbody>
-          ${scored.map(item => `<tr class="${item.final === bestFinal ? 'top-row' : ''}">
-            <td style="font-weight:${item.final === bestFinal ? 600 : 400};white-space:nowrap">${item.name}</td>
-            <td>${statusTag(item.status)}</td>
-            <td style="white-space:nowrap">¥${item.price.toLocaleString()}</td>
-            <td style="font-weight:600;color:${item.final === bestFinal ? 'var(--green)' : 'var(--text)'}">${item.final}</td>
-            ${DIM_KEYS.map(k => `<td class="${item.scores[k] === bestPer[k] ? 'best-val' : ''}">${item.scores[k]}${item.scores[k] === bestPer[k] ? ' ★' : ''}</td>`).join('')}
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>
+// ── COMPARE ───────────────────────────────────────────────────────
+function renderCmp(){
+  fillSel('cmp-cat');
+  const cat=document.getElementById('cmp-cat').value;
+  const pool=byCat(cat);
+  const el=document.getElementById('cmp-out');
+  if(!pool.length){el.innerHTML='<div class="empty">该品类暂无商品</div>';return;}
+  const sch=schema(cat);
+  const sc=pool.map(i=>({...i,_f:finalScore(i),_sc:autoScore(i)})).sort((a,b)=>b._f-a._f);
+  const bpd={};sch.dims.forEach(d=>{bpd[d]=Math.max(...sc.map(i=>i._sc[d]||0));});
+  const bf=Math.max(...sc.map(i=>i._f));
+  el.innerHTML=`<div class="card" style="padding:12px"><div class="cmp-wrap"><table class="cmp-t">
+    <thead><tr><th>型号</th><th>状态</th><th>最低价</th><th>综合分</th>${sch.dims.map(d=>`<th style="color:${sch.colors[d]||'#666'}">${d}</th>`).join('')}</tr></thead>
+    <tbody>${sc.map(item=>`<tr class="${item._f===bf?'tr-top':''}">
+      <td style="font-weight:${item._f===bf?700:400};white-space:nowrap">${item.name}</td>
+      <td>${stag(item.status)}</td>
+      <td style="color:var(--gn);font-weight:600">${lowPrice(item)?'¥'+lowPrice(item).toLocaleString():'—'}</td>
+      <td style="font-weight:700;color:${item._f===bf?'var(--gn)':'var(--tx)'}">${item._f}</td>
+      ${sch.dims.map(d=>`<td class="${(item._sc[d]||0)===bpd[d]?'bv':''}">${item._sc[d]??5}${(item._sc[d]||0)===bpd[d]?' ★':''}</td>`).join('')}
+    </tr>`).join('')}</tbody></table></div>
+    <p class="hint" style="margin-top:8px">绿色行为综合推荐 · ★ 该维度最优 · 评分由参数自动计算</p>
   </div>`;
 }
 
-// ─── Upgrade ──────────────────────────────────────────────────────────────────
-function fillUpgradeSelects() {
-  fillCatSelect('upg-cat');
-  const cat = document.getElementById('upg-cat').value;
-  const pool = getItemsByCat(cat);
-  const opts = pool.map((i, idx) => `<option value="${idx}">${i.name} ¥${i.price.toLocaleString()}</option>`).join('');
-  document.getElementById('upg-from').innerHTML = opts;
-  document.getElementById('upg-to').innerHTML = opts;
-  if (pool.length > 1) document.getElementById('upg-to').selectedIndex = 1;
-  renderUpgrade();
+// ── UPGRADE ───────────────────────────────────────────────────────
+function fillUpgSelects(){
+  fillSel('upg-cat');
+  const pool=byCat(document.getElementById('upg-cat').value);
+  const opts=pool.map((i,idx)=>`<option value="${idx}">${i.name} ¥${i.price.toLocaleString()}</option>`).join('');
+  document.getElementById('upg-from').innerHTML=opts;
+  document.getElementById('upg-to').innerHTML=opts;
+  if(pool.length>1)document.getElementById('upg-to').selectedIndex=1;
+  renderUpg();
 }
-function renderUpgrade() {
-  const cat = document.getElementById('upg-cat').value;
-  const pool = getItemsByCat(cat);
-  const fi = +document.getElementById('upg-from').value;
-  const ti = +document.getElementById('upg-to').value;
-  const thresh = +document.getElementById('upg-thresh').value;
-  const el = document.getElementById('upg-results');
-  if (fi === ti || !pool[fi] || !pool[ti]) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">⚖️</div>请选择两款不同的商品</div>';
-    return;
+function renderUpg(){
+  const pool=byCat(document.getElementById('upg-cat').value);
+  const fi=+document.getElementById('upg-from').value,ti=+document.getElementById('upg-to').value;
+  const thr=+document.getElementById('upg-thresh').value;
+  const el=document.getElementById('upg-out');
+  if(fi===ti||!pool[fi]||!pool[ti]){el.innerHTML='<div class="empty">请选择两款不同商品</div>';return;}
+  const fr=pool[fi],to=pool[ti];
+  const fs=finalScore(fr),ts=finalScore(to);
+  const pd=to.price-fr.price,sd=+(ts-fs).toFixed(2);
+  const p1k=pd!==0?+(sd/Math.abs(pd)*1000).toFixed(3):null;
+  const isUp=pd>0;
+  const worth=isUp?(sd>0.2&&p1k>=thr):(sd>=-0.1);
+  let txt='';
+  if(isUp){
+    if(sd<=0)txt=`多花 ¥${Math.abs(pd).toLocaleString()} 但综合评分${sd<0?'反而降低 '+Math.abs(sd)+' 分':'持平'}，不划算。`;
+    else if(!worth)txt=`每多花 1000 元仅提升 ${p1k} 分，低于阈值 ${thr}，提升感不明显。`;
+    else txt=`每多花 1000 元提升 ${p1k} 分，超过阈值 ${thr}，升级物有所值。`;
+  }else{
+    if(sd>=0)txt=`少花 ¥${Math.abs(pd).toLocaleString()} 综合分不降反升，强烈推荐。`;
+    else txt=`少花 ¥${Math.abs(pd).toLocaleString()}，综合分小降 ${Math.abs(sd)} 分，根据预算自行取舍。`;
   }
-  const from = pool[fi], to = pool[ti];
-  const fromScore = calcScore(from), toScore = calcScore(to);
-  const priceDiff = to.price - from.price;
-  const scoreDiff = +(toScore - fromScore).toFixed(2);
-  const worthVal = priceDiff !== 0 ? +(scoreDiff / Math.abs(priceDiff) * 1000).toFixed(3) : null;
-  const isUpgrade = priceDiff > 0;
-  const isWorth = isUpgrade ? (scoreDiff > 0.2 && worthVal >= thresh) : (scoreDiff >= -0.1);
-
-  let verdictText = '';
-  if (isUpgrade) {
-    if (!isWorth && scoreDiff <= 0) verdictText = `多花 ¥${Math.abs(priceDiff).toLocaleString()} 但综合评分反而${scoreDiff < 0 ? '降低 ' + Math.abs(scoreDiff) + ' 分' : '持平'}，不划算。`;
-    else if (!isWorth) verdictText = `每多花 1000 元仅提升 ${worthVal} 分，低于你设定的阈值 ${thresh}，提升感不明显。`;
-    else verdictText = `每多花 1000 元提升 ${worthVal} 分，超过阈值 ${thresh}，升级物有所值。`;
-  } else {
-    if (scoreDiff >= 0) verdictText = `降价 ¥${Math.abs(priceDiff).toLocaleString()} 的同时综合评分不降反升，强烈推荐。`;
-    else verdictText = `降价 ¥${Math.abs(priceDiff).toLocaleString()}，综合评分小幅降低 ${Math.abs(scoreDiff)} 分，看个人预算取舍。`;
-  }
-
-  el.innerHTML = `<div class="card">
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-val" style="color:${priceDiff > 0 ? 'var(--red)' : 'var(--green)'}">${priceDiff > 0 ? '+' : ''}¥${Math.abs(priceDiff).toLocaleString()}</div>
-        <div class="metric-lbl">价格差异</div>
+  el.innerHTML=`<div class="card">
+    <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+      <div style="flex:1;min-width:130px;background:var(--sf2);border-radius:var(--rs);padding:10px 12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:3px">现有</div>
+        <div style="font-size:13px;font-weight:600">${fr.name}</div>
+        <div style="font-size:18px;font-weight:700;margin-top:2px">¥${fr.price.toLocaleString()}</div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:4px">综合分 <b>${fs}</b></div>
       </div>
-      <div class="metric">
-        <div class="metric-val" style="color:${scoreDiff >= 0 ? 'var(--green)' : 'var(--red)'}">${scoreDiff >= 0 ? '+' : ''}${scoreDiff}</div>
-        <div class="metric-lbl">综合分差</div>
-      </div>
-      <div class="metric">
-        <div class="metric-val" style="font-size:16px">${worthVal !== null ? (worthVal > 0 ? '+' : '') + worthVal : '—'}</div>
-        <div class="metric-lbl">分/千元</div>
+      <div style="display:flex;align-items:center;font-size:20px;color:var(--tx3)">→</div>
+      <div style="flex:1;min-width:130px;background:var(--sf2);border-radius:var(--rs);padding:10px 12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:3px">目标</div>
+        <div style="font-size:13px;font-weight:600">${to.name}</div>
+        <div style="font-size:18px;font-weight:700;margin-top:2px">¥${to.price.toLocaleString()}</div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:4px">综合分 <b>${ts}</b></div>
       </div>
     </div>
-    <div class="verdict ${isWorth ? 'verdict-yes' : 'verdict-no'}">
-      <div class="verdict-title">${isWorth ? '✅ 值得' : '❌ 不建议'}</div>
-      <div class="verdict-body">${verdictText}</div>
+    <div class="mets">
+      <div class="met"><div class="met-v" style="color:${pd>0?'var(--rd)':'var(--gn)'}">${pd>0?'+':''}¥${Math.abs(pd).toLocaleString()}</div><div class="met-l">价格差</div></div>
+      <div class="met"><div class="met-v" style="color:${sd>=0?'var(--gn)':'var(--rd)'}">${sd>=0?'+':''}${sd}</div><div class="met-l">评分差</div></div>
+      <div class="met"><div class="met-v" style="font-size:16px">${p1k!==null?(p1k>0?'+':'')+p1k:'—'}</div><div class="met-l">分/千元</div></div>
     </div>
-    <div class="reason">
-      <b>${from.name}</b> 综合 ${fromScore} 分，¥${from.price.toLocaleString()}<br>
-      → <b>${to.name}</b> 综合 ${toScore} 分，¥${to.price.toLocaleString()}<br>
-      当前阈值：每千元需提升 ≥ ${thresh} 分。可在上方调整阈值改变标准。
+    <div class="verd ${worth?'verd-y':'verd-n'}">
+      <div class="verd-t">${worth?'✅ 值得':'❌ 不建议'}</div>
+      <div class="verd-b">${txt}</div>
     </div>
+    <div class="reason">阈值：每千元需提升 ≥ ${thr} 分才算"值得"，可在上方调整。</div>
   </div>`;
 }
 
-// ─── Prefs ────────────────────────────────────────────────────────────────────
-function renderPrefs() {
-  document.getElementById('pref-sliders').innerHTML = DIM_KEYS.map(k => `
-    <div class="pref-row">
-      <div class="pref-header">
-        <span>${DIMS[k].label}</span>
-        <span id="pv-${k}">${prefs[k]}</span>
+// ── PRICES ────────────────────────────────────────────────────────
+function renderPrc(){
+  fillSel('prc-cat');
+  const cat=document.getElementById('prc-cat').value;
+  const pool=byCat(cat);
+  const el=document.getElementById('prc-out');
+  if(!pool.length){el.innerHTML='<div class="empty">该品类暂无商品</div>';return;}
+  el.innerHTML=pool.map(item=>{
+    const lp=lowPrice(item);
+    const has=item.prices&&Object.values(item.prices).some(v=>v&&v>0);
+    return`<div class="card card-sm">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:${has?'10':'0'}px">
+        <div><span style="font-size:14px;font-weight:600">${item.name}</span> ${stag(item.status)}</div>
+        ${lp?`<div style="text-align:right"><div style="font-size:11px;color:var(--tx3)">最低价</div><div style="font-size:18px;font-weight:700;color:var(--gn)">¥${lp.toLocaleString()}</div></div>`:''}
       </div>
-      <input type="range" min="1" max="10" step="1" value="${prefs[k]}"
-        oninput="prefs['${k}']=+this.value;document.getElementById('pv-${k}').textContent=this.value">
-    </div>`).join('');
-}
-function savePrefs() {
-  savePrefsData(prefs);
-  toast('偏好已保存，推荐结果已更新 ✓');
-}
-function resetPrefs() {
-  prefs = { ...DEFAULT_PREFS };
-  renderPrefs();
-  savePrefsData(prefs);
-  toast('已恢复默认偏好');
-}
-
-// ─── Admin ────────────────────────────────────────────────────────────────────
-function renderAdmin() {
-  const cats = getCategories();
-  const el = document.getElementById('admin-by-cat');
-  if (!items.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-icon">📦</div>暂无商品，点击上方按钮添加</div>';
-    return;
-  }
-  el.innerHTML = cats.map(cat => {
-    const catItems = getItemsByCat(cat);
-    return `<div class="card" style="margin-bottom:12px">
-      <div class="section-title">${cat} <span style="font-weight:400;color:var(--text3)">(${catItems.length})</span></div>
-      <div class="item-list">
-        ${catItems.map(item => `
-          <div class="item-row">
-            <div class="item-info">
-              <div class="item-row-info"><span>${item.name}</span> ${statusTag(item.status)} <small>¥${item.price.toLocaleString()}</small></div>
-              ${item.updated ? `<div style="font-size:11px;color:var(--text3);margin-top:2px">更新：${item.updated}</div>` : ''}
-            </div>
-            <div class="item-row-actions">
-              <button class="btn btn-sm" onclick="openEditModal('${item.id}')">编辑</button>
-              <button class="btn btn-sm btn-danger" onclick="deleteItem('${item.id}')">删除</button>
-            </div>
-          </div>`).join('')}
-      </div>
+      ${has?`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${Object.entries(PLAT).map(([k,l])=>{const v=item.prices[k];if(!v||v<=0)return`<div style="background:var(--sf2);border-radius:var(--rs);padding:8px;text-align:center"><div style="font-size:11px;color:var(--tx3)">${l}</div><div style="color:var(--tx3);font-size:13px;margin-top:2px">—</div></div>`;const low=v===lp;return`<div style="background:${low?'var(--gn-bg)':'var(--sf2)'};border:1px solid ${low?'var(--gn-bd)':'var(--bd)'};border-radius:var(--rs);padding:8px;text-align:center"><div style="font-size:11px;color:${low?'var(--gn)':'var(--tx3)'};font-weight:${low?700:400}">${l}${low?' ★':''}</div><div style="font-size:14px;font-weight:700;color:${low?'var(--gn)':'var(--tx)'};margin-top:2px">¥${v.toLocaleString()}</div></div>`;}).join('')}
+      </div>`:'<p class="hint">未录入各平台价格，在「管理商品」中编辑添加。</p>'}
+      ${item.updated?`<p class="hint" style="margin-top:8px">更新：${item.updated}</p>`:''}
     </div>`;
   }).join('');
 }
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
-let editingId = null;
-function buildScoreGrid() {
-  document.getElementById('score-grid').innerHTML = DIM_KEYS.map(k => `
-    <div>
-      <label>${DIMS[k].label}（0–10）</label>
-      <input type="number" id="fs-${k}" min="0" max="10" step="0.5" placeholder="0–10">
+// ── PREFS ─────────────────────────────────────────────────────────
+function renderPrefs(){
+  document.getElementById('presets-wrap').innerHTML=PRESETS.map((p,i)=>`<button class="preset" onclick="applyPreset(${i},this)">${p.label}</button>`).join('');
+  document.getElementById('prf-sliders').innerHTML=Object.entries(W_LABELS).map(([k,l])=>`
+    <div class="pref-row">
+      <div class="ph"><span>${l}</span><span id="wv-${k}">${W[k]}</span></div>
+      <input type="range" min="1" max="10" step="1" value="${W[k]}" oninput="W['${k}']=+this.value;document.getElementById('wv-${k}').textContent=this.value">
     </div>`).join('');
 }
-function openAddModal() {
-  editingId = null;
-  document.getElementById('modal-title').textContent = '添加商品';
-  buildScoreGrid();
-  ['name','cat','note'].forEach(f => document.getElementById('f-'+f).value = '');
-  document.getElementById('f-price').value = '';
-  document.getElementById('f-status').value = 'active';
-  DIM_KEYS.forEach(k => document.getElementById('fs-'+k).value = '');
-  document.getElementById('modal').classList.remove('hidden');
+function applyPreset(i,btn){
+  document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  W={...PRESETS[i].w};saveW(W);renderPrefs();btn.classList.add('active');
+  toast('已应用「'+PRESETS[i].label+'」✓');
 }
-function openEditModal(id) {
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  editingId = id;
-  document.getElementById('modal-title').textContent = '编辑商品';
-  buildScoreGrid();
-  document.getElementById('f-name').value = item.name;
-  document.getElementById('f-cat').value = item.cat;
-  document.getElementById('f-price').value = item.price;
-  document.getElementById('f-status').value = item.status || 'active';
-  document.getElementById('f-note').value = item.note || '';
-  DIM_KEYS.forEach(k => document.getElementById('fs-'+k).value = item.scores[k] ?? '');
-  document.getElementById('modal').classList.remove('hidden');
-}
-function closeModal() {
-  document.getElementById('modal').classList.add('hidden');
-}
-function saveItem() {
-  const name = document.getElementById('f-name').value.trim();
-  const cat = document.getElementById('f-cat').value.trim();
-  const price = +document.getElementById('f-price').value;
-  if (!name || !cat || !price) { toast('请填写名称、品类和价格'); return; }
-  const scores = {};
-  for (const k of DIM_KEYS) {
-    const v = parseFloat(document.getElementById('fs-'+k).value);
-    scores[k] = isNaN(v) ? 5 : Math.min(10, Math.max(0, v));
-  }
-  const now = new Date();
-  const updated = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
-  if (editingId) {
-    const idx = items.findIndex(i => i.id === editingId);
-    if (idx >= 0) items[idx] = { ...items[idx], name, cat, price, status: document.getElementById('f-status').value, note: document.getElementById('f-note').value.trim(), scores, updated };
-  } else {
-    items.push({ id: 'u' + Date.now(), name, cat, price, status: document.getElementById('f-status').value, note: document.getElementById('f-note').value.trim(), scores, updated });
-  }
-  saveData(items);
-  updateItemCount();
-  closeModal();
-  renderAdmin();
-  toast(editingId ? '商品已更新 ✓' : '商品已添加 ✓');
-}
-function deleteItem(id) {
-  if (!confirm('确认删除这件商品？')) return;
-  items = items.filter(i => i.id !== id);
-  saveData(items);
-  updateItemCount();
-  renderAdmin();
-  toast('已删除');
+function savePrefs(){saveW(W);toast('偏好已保存 ✓');}
+function resetPrefs(){W={...DEF_W};saveW(W);renderPrefs();toast('已恢复默认');}
+
+// ── ADMIN ─────────────────────────────────────────────────────────
+function renderAdm(){
+  const cats=getCats(),el=document.getElementById('adm-out');
+  if(!items.length){el.innerHTML='<div class="empty">暂无商品，点击「添加商品」开始</div>';return;}
+  el.innerHTML=cats.map(cat=>`<div class="card" style="margin-bottom:12px">
+    <p class="stitle">${cat} <span style="font-weight:400;color:var(--tx3)">(${byCat(cat).length})</span></p>
+    ${byCat(cat).map(item=>`<div class="irow">
+      <div><div class="iname">${item.name} ${stag(item.status)}</div>
+      <div class="imeta">¥${item.price.toLocaleString()} · 综合分 ${finalScore(item)} · ${item.updated||'未更新'}</div></div>
+      <div class="iacts">
+        <button class="btn btn-sm" onclick="openEdit('${item.id}')">编辑</button>
+        <button class="btn btn-sm btn-d" onclick="delItem('${item.id}')">删除</button>
+      </div>
+    </div>`).join('')}
+  </div>`).join('');
 }
 
-// Close modal on overlay click
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
+// ── EXPORT / IMPORT ───────────────────────────────────────────────
+function exportData(){
+  const b=new Blob([JSON.stringify({items,weights:W},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);
+  a.download='shopping-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('备份已下载 ✓');
+}
+function importData(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.items&&Array.isArray(d.items)){items=d.items;saveItems(items);}if(d.weights){W=d.weights;saveW(W);renderPrefs();}updCount();renderAdm();fillAll();renderRec();toast('导入成功 ✓');}catch{toast('文件格式错误');}};
+  r.readAsText(f);input.value='';
+}
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-fillCatSelects('rec-cat', 'cmp-cat', 'upg-cat');
-renderPrefs();
-renderRecommend();
-updateItemCount();
+// ── MODAL ─────────────────────────────────────────────────────────
+let editId=null;
+
+function buildParamFields(){
+  const cat=document.getElementById('f-cat').value;
+  const sch=schema(cat);
+  document.getElementById('param-fields').innerHTML=sch.params.map(p=>`
+    <div style="margin-bottom:10px">
+      <label>${p.label}</label>
+      ${p.type==='sel'
+        ?`<select id="fp-${p.key}"><option value="">— 不知道 —</option>${p.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
+        :`<input type="number" id="fp-${p.key}" placeholder="${p.ph||''}" min="0" oninput="updatePreview()">`}
+      ${p.hint?`<p class="hint">${p.hint}</p>`:''}
+    </div>`).join('');
+  sch.params.filter(p=>p.type==='sel').forEach(p=>{
+    document.getElementById('fp-'+p.key).addEventListener('change',updatePreview);
+  });
+  updatePreview();
+}
+
+function updatePreview(){
+  const cat=document.getElementById('f-cat').value;
+  const price=+document.getElementById('f-price').value||1000;
+  const sch=schema(cat);
+  const params={};
+  sch.params.forEach(p=>{
+    const el=document.getElementById('fp-'+p.key);
+    if(!el)return;
+    const v=p.type==='sel'?el.value:+el.value;
+    if(v&&v!=='')params[p.key]=v;
+  });
+  const scores=sch.score(params,price);
+  const pv=document.getElementById('score-preview');
+  pv.style.display='block';
+  pv.innerHTML='<b>自动计算评分预览：</b> '+Object.entries(scores).map(([k,v])=>`${k} <b>${v}</b>`).join(' · ');
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById('mo-title').textContent='添加商品';
+  ['f-name','f-img','f-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-price').value='';
+  document.getElementById('f-status').value='active';
+  document.getElementById('f-cat').value='防晒衣';
+  ['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el)el.value='';});
+  buildParamFields();
+  document.getElementById('modal').classList.remove('hidden');
+}
+function openEdit(id){
+  const item=items.find(i=>i.id===id);if(!item)return;
+  editId=id;
+  document.getElementById('mo-title').textContent='编辑商品';
+  document.getElementById('f-name').value=item.name;
+  document.getElementById('f-cat').value=item.cat;
+  document.getElementById('f-price').value=item.price;
+  document.getElementById('f-status').value=item.status||'active';
+  document.getElementById('f-img').value=item.img||'';
+  document.getElementById('f-note').value=item.note||'';
+  ['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el)el.value=item.prices&&item.prices[k]?item.prices[k]:'';});
+  buildParamFields();
+  // fill param values
+  const sch=schema(item.cat);
+  sch.params.forEach(p=>{
+    const el=document.getElementById('fp-'+p.key);
+    if(el&&item.params&&item.params[p.key]!=null)el.value=item.params[p.key];
+  });
+  updatePreview();
+  document.getElementById('modal').classList.remove('hidden');
+}
+function closeModal(){document.getElementById('modal').classList.add('hidden');}
+function saveItem(){
+  const name=document.getElementById('f-name').value.trim();
+  const cat=document.getElementById('f-cat').value;
+  const price=+document.getElementById('f-price').value;
+  if(!name||!price){toast('请填写名称和价格');return;}
+  const sch=schema(cat);
+  const params={};
+  sch.params.forEach(p=>{
+    const el=document.getElementById('fp-'+p.key);if(!el)return;
+    const v=p.type==='sel'?el.value:+el.value;
+    if(v&&v!=='')params[p.key]=p.type==='sel'?v:v;
+  });
+  const prices={};
+  ['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el){const v=+el.value;prices[k]=v||null;}});
+  const now=new Date();
+  const updated=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const rec={name,cat,price,status:document.getElementById('f-status').value,img:document.getElementById('f-img').value.trim(),note:document.getElementById('f-note').value.trim(),params,prices,updated};
+  if(editId){const idx=items.findIndex(i=>i.id===editId);if(idx>=0)items[idx]={...items[idx],...rec};}
+  else items.push({id:'u'+Date.now(),...rec});
+  saveItems(items);updCount();closeModal();renderAdm();
+  toast(editId?'已更新 ✓':'已添加 ✓');
+}
+function delItem(id){if(!confirm('确认删除？'))return;items=items.filter(i=>i.id!==id);saveItems(items);updCount();renderAdm();toast('已删除');}
+
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+function switchTab(id,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');
+  if(id==='rec'){fillSel('rec-cat');renderRec();}
+  if(id==='cmp'){fillSel('cmp-cat');renderCmp();}
+  if(id==='upg'){fillSel('upg-cat');fillUpgSelects();}
+  if(id==='prc'){fillSel('prc-cat');renderPrc();}
+  if(id==='adm')renderAdm();
+}
+
+// Init
+fillAll();renderPrefs();renderRec();updCount();
 </script>
 </body>
 </html>
