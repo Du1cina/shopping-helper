@@ -615,29 +615,86 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 // ════════════════════════════════════════════════════════════
 const SCHEMAS = {
   '公路车': {
-    dims: ['性能','轻量','耐用性','性价比'],
-    colors: {'性能':'#34d399','轻量':'#60a5fa','耐用性':'#fbbf24','性价比':'#f472b6'},
-    wkeys: {'性能':'perf','轻量':'portable','耐用性':'quality','性价比':'value'},
+    dims: ['骑姿舒适度','传动系统','轮组','整车重量','刹车','性价比'],
+    colors: {'骑姿舒适度':'#34d399','传动系统':'#60a5fa','轮组':'#a78bfa','整车重量':'#fbbf24','刹车':'#f87171','性价比':'#f472b6'},
+    wkeys: {'骑姿舒适度':'perf','传动系统':'perf','轮组':'portable','整车重量':'portable','刹车':'quality','性价比':'value'},
+    // 维度说明（用于界面展示）
+    dimDesc: {
+      '骑姿舒适度':'腰累不累 · 能否骑远 · 新手友好度',
+      '传动系统':'换挡顺滑 · 卡顿风险 · 使用寿命',
+      '轮组':'起步轻快 · 巡航省力 · 长途表现',
+      '整车重量':'搬车 · 爬坡 · 心理感受',
+      '刹车':'下坡安全 · 雨天表现',
+      '性价比':'综合性价比'
+    },
     params: [
-      {key:'weight',label:'整车重量（kg）',ph:'8.5',hint:'越轻越好，竞赛车约7kg，入门约10kg'},
-      {key:'gears',label:'变速总级数',ph:'22',hint:'如11速×2盘=22，越多通常越好'},
-      {key:'frame',label:'车架材质',type:'sel',opts:['碳纤维','铝合金（高端）','铝合金（标准）','钢']},
-      {key:'groupset',label:'套件等级',type:'sel',opts:['Dura-Ace/Red','Ultegra/Force','105/Rival','Tiagra/Claris','入门/无品牌'],hint:'变速系统品牌等级'},
-      {key:'wheelset',label:'轮组等级',type:'sel',opts:['碳纤维轮组','铝合金高端','铝合金标准','入门轮组']},
+      // 骑姿舒适度
+      {key:'stack',label:'Stack（mm）',ph:'560',hint:'越大越直立舒适，耐力型>560mm；越小越趴低竞速'},
+      {key:'reach',label:'Reach（mm）',ph:'385',hint:'越小越舒适，新手建议<390mm'},
+      {key:'head_tube',label:'头管长度（mm）',ph:'130',hint:'越长骑姿越直立，舒适度越高'},
+      {key:'top_tube',label:'上管有效长度（mm）',ph:'540',hint:'影响俯身程度，越短越舒适'},
+      {key:'geo_type',label:'几何风格',type:'sel',opts:['舒适耐力型','均衡型','竞速型','极限竞速型'],hint:'直接影响骑姿和舒适度'},
+      // 传动系统
+      {key:'groupset',label:'变速套件',type:'sel',opts:['Dura-Ace（顶级）','Ultegra（次旗舰）','105（主流推荐）','Tiagra（入门+）','Sora（入门）','Claris（基础）','Tourney（最基础）','SRAM Red','SRAM Force','SRAM Rival','其他'],hint:'Shimano 105 是性价比分水岭'},
+      {key:'gears',label:'总速别',ph:'22',hint:'如：11速×2盘=22速；速别越多适应坡度越广'},
+      {key:'drivetrain',label:'传动形式',type:'sel',opts:['机械变速','电子变速（Di2/eTap）'],hint:'电子变速换挡精准无需调整'},
+      // 轮组
+      {key:'wheelset',label:'轮组品牌/类型',type:'sel',opts:['碳纤维轻量轮组（品牌）','铝合金高端轮组（品牌）','铝合金标准轮组','OEM入门轮组'],hint:'轮组对骑感影响非常大'},
+      {key:'hub',label:'花鼓品牌',type:'sel',opts:['Shimano（禧玛诺）','Campagnolo','Chris King','DT Swiss','原厂OEM','不明'],hint:'好花鼓转动顺滑、使用寿命长'},
+      {key:'rim_type',label:'轮圈形式',type:'sel',opts:['无内胎（Tubeless）','内胎式','管胎'],hint:'无内胎防扎胎性好，骑感更佳'},
+      // 重量
+      {key:'weight',label:'整车重量（kg）',ph:'9.0',hint:'竞赛车约7kg，入门铝车约9-10kg'},
+      {key:'frame',label:'车架材质',type:'sel',opts:['高模碳纤维','标准碳纤维','铝合金（高端）','铝合金（标准）','铬钼钢','钢'],hint:'碳纤维轻且吸振，铝合金性价比高'},
+      // 刹车
+      {key:'brake',label:'刹车类型',type:'sel',opts:['油压碟刹','机械碟刹','圈刹（双轴）','圈刹（直拉）'],hint:'油压碟刹制动力最强，雨天最稳定'},
     ],
     score(p,price){
-      const gsS={'Dura-Ace/Red':10,'Ultegra/Force':8,'105/Rival':6.5,'Tiagra/Claris':5,'入门/无品牌':3};
-      const frS={'碳纤维':10,'铝合金（高端）':7,'铝合金（标准）':5,'钢':3};
-      const wlS={'碳纤维轮组':9,'铝合金高端':7,'铝合金标准':5,'入门轮组':3};
-      const gs=gsS[p.groupset]??5,fr=frS[p.frame]??5,wl=wlS[p.wheelset]??5;
-      const gearS=p.gears?Math.min(10,(p.gears-14)/18*10):5;
-      const perf=gs*0.6+gearS*0.4;
-      const wtS=p.weight?Math.max(0,Math.min(10,(11-p.weight)/4*10)):5;
-      const light=wtS*0.5+fr*0.3+wl*0.2;
-      const dur=Math.min(10,fr*0.5+gs*0.3+wl*0.2);
-      const raw=(perf+light+dur)/3;
+      // === 骑姿舒适度 ===
+      const geoS={'舒适耐力型':10,'均衡型':7.5,'竞速型':5,'极限竞速型':2.5};
+      let comfort = geoS[p.geo_type] ?? 6;
+      // Stack 调整：越高越舒适
+      if(p.stack){ const stackAdj=(p.stack-520)/80*2; comfort=Math.min(10,Math.max(1,comfort+stackAdj*0.3)); }
+      // Reach 调整：越短越舒适
+      if(p.reach){ const reachAdj=(410-p.reach)/40*1.5; comfort=Math.min(10,Math.max(1,comfort+reachAdj*0.2)); }
+      if(p.head_tube){ const htAdj=(p.head_tube-100)/80*1.5; comfort=Math.min(10,Math.max(1,comfort+htAdj*0.15)); }
+
+      // === 传动系统 ===
+      const gsS={'Dura-Ace（顶级）':10,'Ultegra（次旗舰）':8.5,'105（主流推荐）':7,'Tiagra（入门+）':5.5,'Sora（入门）':4.5,'Claris（基础）':3.5,'Tourney（最基础）':2,'SRAM Red':10,'SRAM Force':8,'SRAM Rival':6.5,'其他':4};
+      const gsScore=gsS[p.groupset]??5;
+      const gearScore=p.gears?Math.min(10,3+(p.gears-14)/16*5):5;
+      const diS={'电子变速（Di2/eTap）':10,'机械变速':7};
+      const diScore=diS[p.drivetrain]??7;
+      const drivetrain=gsScore*0.55+gearScore*0.25+diScore*0.2;
+
+      // === 轮组 ===
+      const wlS={'碳纤维轻量轮组（品牌）':10,'铝合金高端轮组（品牌）':7.5,'铝合金标准轮组':5,'OEM入门轮组':3};
+      const hubS={'Shimano（禧玛诺）':7,'Campagnolo':8,'Chris King':10,'DT Swiss':9,'原厂OEM':4,'不明':4};
+      const rimS={'无内胎（Tubeless）':10,'内胎式':6,'管胎':8};
+      const wheelset=(wlS[p.wheelset]??5)*0.5+(hubS[p.hub]??4)*0.3+(rimS[p.rim_type]??6)*0.2;
+
+      // === 整车重量 ===
+      const frS={'高模碳纤维':10,'标准碳纤维':8,'铝合金（高端）':6.5,'铝合金（标准）':5,'铬钼钢':4,'钢':3};
+      const frScore=frS[p.frame]??5;
+      const wtScore=p.weight?Math.max(0,Math.min(10,(12-p.weight)/5*10)):5;
+      const weightDim=wtScore*0.65+frScore*0.35;
+
+      // === 刹车 ===
+      const brS={'油压碟刹':10,'机械碟刹':7,'圈刹（双轴）':5,'圈刹（直拉）':4};
+      const brake=brS[p.brake]??5;
+
+      // === 性价比 ===
+      const raw=(comfort*0.3+drivetrain*0.25+wheelset*0.2+weightDim*0.15+brake*0.1);
       const pf=Math.log10((price||3000)/1000+1)*4;
-      return {'性能':+perf.toFixed(1),'轻量':+light.toFixed(1),'耐用性':+dur.toFixed(1),'性价比':+Math.min(10,raw/pf*3).toFixed(1)};
+      const value=Math.min(10,raw/pf*3);
+
+      return {
+        '骑姿舒适度':+Math.min(10,comfort).toFixed(1),
+        '传动系统':+Math.min(10,drivetrain).toFixed(1),
+        '轮组':+Math.min(10,wheelset).toFixed(1),
+        '整车重量':+Math.min(10,weightDim).toFixed(1),
+        '刹车':+Math.min(10,brake).toFixed(1),
+        '性价比':+value.toFixed(1)
+      };
     }
   },
   '意式浓缩机': {
@@ -753,7 +810,7 @@ const PRESETS=[
   {label:'性价比优先',w:{perf:5,value:10,quality:5,portable:5}},
   {label:'耐用优先',w:{perf:5,value:5,quality:10,portable:5}},
 ];
-const DKM={'性能':'perf','活动性':'perf','萃取质量':'perf','咖啡质量':'perf','轻量':'portable','便携性':'portable','透气性':'portable','耐用性':'quality','功能性':'quality','易用性':'quality','防护力':'quality','性价比':'value'};
+const DKM={'性能':'perf','活动性':'perf','萃取质量':'perf','咖啡质量':'perf','骑姿舒适度':'perf','传动系统':'perf','轮组':'portable','轻量':'portable','便携性':'portable','透气性':'portable','整车重量':'portable','刹车':'quality','耐用性':'quality','功能性':'quality','易用性':'quality','防护力':'quality','性价比':'value'};
 const DEF_W={perf:7,value:8,quality:6,portable:5};
 const W_LABELS={perf:'性能 / 活动性',value:'性价比',quality:'耐用 / 功能 / 防护',portable:'轻量 / 透气 / 便携'};
 const PLAT={jd:'京东',tb:'淘宝',pdd:'拼多多',dy:'抖音'};
@@ -766,9 +823,9 @@ let W=loadW();
 // SAMPLE DATA
 // ════════════════════════════════════════════════════════════
 const SAMPLE=[
-  {id:'r1',name:'捷安特 TCR Advanced 2',cat:'公路车',price:8500,status:'active',note:'铝车架竞速入门',img:'',prices:{jd:8500,tb:8300,pdd:8100,dy:null},updated:'2026-05',params:{weight:8.7,gears:22,frame:'铝合金（高端）',groupset:'105/Rival',wheelset:'铝合金高端'}},
-  {id:'r2',name:'Trek Émonda SL 5',cat:'公路车',price:12800,status:'active',note:'碳纤维轻量爬坡',img:'',prices:{jd:12800,tb:12500,pdd:null,dy:null},updated:'2026-05',params:{weight:7.5,gears:22,frame:'碳纤维',groupset:'105/Rival',wheelset:'铝合金高端'}},
-  {id:'r3',name:'美利达 Scultura 400',cat:'公路车',price:4200,status:'active',note:'入门竞速性价比高',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:3950},updated:'2026-05',params:{weight:9.5,gears:16,frame:'铝合金（标准）',groupset:'Tiagra/Claris',wheelset:'铝合金标准'}},
+  {id:'r1',name:'捷安特 TCR Advanced 2',cat:'公路车',price:8500,status:'active',note:'铝车架竞速入门',img:'',prices:{jd:8500,tb:8300,pdd:8100,dy:null},updated:'2026-05',params:{stack:535,reach:388,head_tube:120,geo_type:'竞速型',groupset:'105（主流推荐）',gears:22,drivetrain:'机械变速',wheelset:'铝合金高端轮组（品牌）',hub:'Shimano（禧玛诺）',rim_type:'内胎式',weight:8.7,frame:'铝合金（高端）',brake:'机械碟刹'}},
+  {id:'r2',name:'Trek Émonda SL 5',cat:'公路车',price:12800,status:'active',note:'碳纤维轻量爬坡',img:'',prices:{jd:12800,tb:12500,pdd:null,dy:null},updated:'2026-05',params:{stack:545,reach:382,head_tube:130,geo_type:'均衡型',groupset:'105（主流推荐）',gears:22,drivetrain:'机械变速',wheelset:'铝合金高端轮组（品牌）',hub:'Shimano（禧玛诺）',rim_type:'内胎式',weight:7.5,frame:'标准碳纤维',brake:'机械碟刹'}},
+  {id:'r3',name:'美利达 Scultura 400',cat:'公路车',price:4200,status:'active',note:'入门竞速性价比高',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:3950},updated:'2026-05',params:{stack:525,reach:395,head_tube:110,geo_type:'均衡型',groupset:'Claris（基础）',gears:16,drivetrain:'机械变速',wheelset:'铝合金标准轮组',hub:'原厂OEM',rim_type:'内胎式',weight:9.5,frame:'铝合金（标准）',brake:'圈刹（双轴）'}},
   {id:'c1',name:'德龙 Dedica EC685',cat:'意式浓缩机',price:999,status:'active',note:'入门意式小巧便宜',img:'',prices:{jd:999,tb:899,pdd:849,dy:929},updated:'2026-05',params:{pressure:15,boiler:'单锅炉（小）',pid:'无',grinder:'无',preinfusion:'无',steam:'Panarello棒'}},
   {id:'c2',name:'Breville Barista Express',cat:'意式浓缩机',price:4200,status:'active',note:'内置磨豆机一体机',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:null},updated:'2026-05',params:{pressure:15,boiler:'单锅炉（大）',pid:'有',grinder:'有（锥刀）',preinfusion:'手动',steam:'专业蒸汽棒'}},
   {id:'s1',name:'迪卡侬 UV Protect',cat:'防晒衣',price:149,status:'active',note:'基础款性价比高',img:'',prices:{jd:149,tb:139,pdd:129,dy:135},updated:'2026-05',params:{stretch:'双向弹力',weight_fabric:110,material:'涤纶',upf:'UPF50+',mosquito:'无',mesh:'局部网眼',waterproof:'无'}},
@@ -838,7 +895,13 @@ function bars(item){
   const s=sch(item.cat),scores=autoScore(item);
   return s.dims.map(d=>{
     const v=scores[d]??5,c=s.colors[d]||'#9896a0';
-    return`<div class="srow"><span class="slbl">${d}</span><div class="bbg"><div class="bfill" style="width:${v*10}%;background:${c}"></div></div><span class="snum">${v}</span></div>`;
+    const desc=s.dimDesc&&s.dimDesc[d]?`title="${s.dimDesc[d]}"`:'';
+    const stars='★'.repeat(Math.round(v/2))+'☆'.repeat(5-Math.round(v/2));
+    return`<div class="srow" ${desc} style="cursor:default">
+      <span class="slbl" style="font-size:10px">${d}</span>
+      <div class="bbg"><div class="bfill" style="width:${v*10}%;background:${c}"></div></div>
+      <span class="snum">${v}</span>
+    </div>`;
   }).join('');
 }
 
