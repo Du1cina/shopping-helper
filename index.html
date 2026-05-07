@@ -234,6 +234,7 @@ textarea { resize: vertical; min-height: 54px; }
 /* Verdict */
 .verd { border-radius: var(--r); padding: 16px 18px; margin-top: 14px; }
 .verd-y { background: var(--green-bg); border: 1px solid var(--green-border); }
+.verd-ok { background: var(--amber-bg); border: 1px solid var(--amber-border); }
 .verd-n { background: var(--red-bg); border: 1px solid var(--red-border); }
 .verd-t { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
 .verd-y .verd-t { color: var(--green); }
@@ -480,10 +481,11 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
         <div><label>我现在用的</label><select id="upg-from" onchange="renderUpg()"></select></div>
         <div><label>想换到</label><select id="upg-to" onchange="renderUpg()"></select></div>
       </div>
-      <div>
-        <label>值得升级阈值（分/千元）</label>
-        <input type="number" id="upg-thresh" value="0.05" min="0.001" step="0.01" style="width:120px" oninput="renderUpg()">
-        <p class="hint">每多花 1000 元，综合分需提升至少这么多才算值得</p>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--text2);line-height:2">
+        <b style="color:var(--text)">判定标准：</b><br>
+        ✅ <b>强烈推荐</b>：分差 ≥ 0.6 且 分差/千元 ≥ 0.3<br>
+        🟡 <b>可以升级</b>：分差 ≥ 0.4 且 分差/千元 ≥ 0.25<br>
+        ❌ <b>不推荐</b>：其他情况
       </div>
     </div>
     <div id="upg-out"></div>
@@ -597,6 +599,19 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     </div>
 
     <p class="mo-sec">📊 品类参数 <span style="font-weight:400;color:var(--text3);font-size:11px">不知道可留空，系统用中间值处理</span></p>
+    <div style="margin-bottom:10px">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <textarea id="paste-params" placeholder="粘贴商品参数文字，自动识别填入↓
+例如：
+整车重量：8.7kg
+变速套件：Shimano 105
+刹车：机械碟刹
+Stack：535mm
+Reach：388mm" style="flex:1;min-height:80px;font-size:12px"></textarea>
+        <button class="btn btn-sm" onclick="parseAndFillParams()" style="flex-shrink:0;align-self:flex-start;margin-top:0">⚡ 自动填入</button>
+      </div>
+      <p class="hint">支持任意格式的参数文字，复制官网规格页粘贴即可</p>
+    </div>
     <div id="param-fields"></div>
     <div id="score-preview" style="display:none" class="score-preview"></div>
 
@@ -683,7 +698,7 @@ const SCHEMAS = {
       const brake=brS[p.brake]??5;
 
       // === 性价比 ===
-      const raw=(comfort*0.3+drivetrain*0.25+wheelset*0.2+weightDim*0.15+brake*0.1);
+      const raw=(comfort*0.30+wheelset*0.25+drivetrain*0.20+frScore*0.15+brake*0.05+wtScore*0.05);
       const pf=Math.log10((price||3000)/1000+1)*4;
       const value=Math.min(10,raw/pf*3);
 
@@ -985,7 +1000,7 @@ function renderCmp(){
     <div class="cmp-wrap">
       <table class="cmp-t">
         <thead><tr>
-          <th>型号</th><th>图片</th><th>状态</th><th>最低价</th><th>综合分</th>
+          <th>型号</th><th>图片</th><th>状态</th><th>参考价</th><th>综合分</th>
           ${s.dims.map(d=>`<th style="color:${s.colors[d]||'#666'}">${d}</th>`).join('')}
         </tr></thead>
         <tbody>${scored.map(item=>`<tr class="${item._f===bf?'tr-top':''}">
@@ -996,7 +1011,7 @@ function renderCmp(){
               :`<div style="width:40px;height:40px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">${{'公路车':'🚴','意式浓缩机':'☕','全自动咖啡机':'☕','手冲/滴滤机':'☕','防晒衣':'🧥'}[item.cat]||'📦'}</div>`}
           </td>
           <td>${stag(item.status)}</td>
-          <td style="color:var(--green);font-weight:600;white-space:nowrap">${lowPrice(item)?'¥'+lowPrice(item).toLocaleString():'—'}</td>
+          <td style="font-weight:600;white-space:nowrap">¥${item.price.toLocaleString()}</td>
           <td style="font-weight:700;color:${item._f===bf?'var(--accent2)':'var(--text)'};font-size:14px">${item._f}</td>
           ${s.dims.map(d=>`<td class="${(item._sc[d]||0)===bpd[d]?'bv':''}">${item._sc[d]??5}${(item._sc[d]||0)===bpd[d]?' ★':''}</td>`).join('')}
         </tr>`).join('')}</tbody>
@@ -1021,7 +1036,6 @@ function fillUpgSelects(){
 function renderUpg(){
   const pool=byCat(document.getElementById('upg-cat').value);
   const fi=+document.getElementById('upg-from').value,ti=+document.getElementById('upg-to').value;
-  const thr=+document.getElementById('upg-thresh').value;
   const el=document.getElementById('upg-out');
   if(fi===ti||!pool[fi]||!pool[ti]){el.innerHTML='<div class="empty"><div class="empty-icon">⚖️</div>请选择两款不同商品</div>';return;}
   const fr=pool[fi],to=pool[ti];
@@ -1029,16 +1043,46 @@ function renderUpg(){
   const pd=to.price-fr.price,sd=+(ts-fs).toFixed(2);
   const p1k=pd!==0?+(sd/Math.abs(pd)*1000).toFixed(3):null;
   const isUp=pd>0;
-  const worth=isUp?(sd>0.2&&p1k>=thr):(sd>=-0.1);
-  let txt='';
-  if(isUp){
-    if(sd<=0)txt=`多花 ¥${Math.abs(pd).toLocaleString()} 但综合评分${sd<0?'反而降低 '+Math.abs(sd)+' 分':'持平'}，不划算。`;
-    else if(!worth)txt=`每多花 1000 元仅提升 ${p1k} 分，低于阈值 ${thr}，提升感不明显。`;
-    else txt=`每多花 1000 元提升 ${p1k} 分，超过阈值 ${thr}，升级物有所值。`;
-  }else{
-    if(sd>=0)txt=`少花 ¥${Math.abs(pd).toLocaleString()} 综合分不降反升，强烈推荐。`;
-    else txt=`少花 ¥${Math.abs(pd).toLocaleString()}，综合分小降 ${Math.abs(sd)} 分，根据预算自行取舍。`;
+
+  // 三档判定
+  let level,verdClass,verdIcon,txt,reasonTxt;
+  if(!isUp){
+    // 降价情况
+    if(sd>=0){
+      level='strong';verdClass='verd-y';verdIcon='✅';
+      txt='少花钱综合分不降反升，强烈推荐。';
+    } else if(sd>=-0.3){
+      level='ok';verdClass='verd-ok';verdIcon='🟡';
+      txt=`少花 ¥${Math.abs(pd).toLocaleString()}，综合分小降 ${Math.abs(sd)} 分，如预算有限可以接受。`;
+    } else {
+      level='no';verdClass='verd-n';verdIcon='❌';
+      txt=`虽然价格更低，但综合分明显下降 ${Math.abs(sd)} 分，不建议降级。`;
+    }
+    reasonTxt='降价方案：综合分变化决定是否值得。';
+  } else if(sd<=0){
+    level='no';verdClass='verd-n';verdIcon='❌';
+    txt=`多花 ¥${pd.toLocaleString()} 但综合评分${sd<0?'反而降低 '+Math.abs(sd)+' 分':'持平'}，不划算。`;
+    reasonTxt='花更多钱却没有提升，明确不推荐。';
+  } else {
+    // 升价且有提升——三档判定
+    if(sd>=0.6 && p1k>=0.3){
+      level='strong';verdClass='verd-y';verdIcon='✅';
+      txt=`分差 ${sd}（≥0.6）且每千元提升 ${p1k} 分（≥0.3），提升幅度明显，强烈推荐升级。`;
+      reasonTxt='同时满足分差和效率双指标，升级体验提升显著。';
+    } else if(sd>=0.4 && p1k>=0.25){
+      level='ok';verdClass='verd-ok';verdIcon='🟡';
+      txt=`分差 ${sd}（≥0.4）且每千元提升 ${p1k} 分（≥0.25），有一定提升，如预算允许可以升级。`;
+      reasonTxt='满足基础升级标准，但提升幅度一般，取决于你的预算余裕。';
+    } else {
+      level='no';verdClass='verd-n';verdIcon='❌';
+      const reason1=sd<0.4?`分差仅 ${sd}（需≥0.4）`:'';
+      const reason2=p1k<0.25?`每千元仅提升 ${p1k} 分（需≥0.25）`:'';
+      const reasons=[reason1,reason2].filter(Boolean).join('、');
+      txt=`${reasons}，提升感不明显，不推荐升级。`;
+      reasonTxt='未达到推荐升级的最低标准，建议等待更大幅度的差距。';
+    }
   }
+
   el.innerHTML=`<div class="card">
     <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px">
@@ -1056,15 +1100,24 @@ function renderUpg(){
       </div>
     </div>
     <div class="mets">
-      <div class="met"><div class="met-v" style="color:${pd>0?'var(--red)':'var(--green)'}">${pd>0?'+':''}¥${Math.abs(pd).toLocaleString()}</div><div class="met-l">价格差</div></div>
-      <div class="met"><div class="met-v" style="color:${sd>=0?'var(--green)':'var(--red)'}">${sd>=0?'+':''}${sd}</div><div class="met-l">评分差</div></div>
-      <div class="met"><div class="met-v" style="font-size:17px">${p1k!==null?(p1k>0?'+':'')+p1k:'—'}</div><div class="met-l">分/千元</div></div>
+      <div class="met">
+        <div class="met-v" style="color:${pd>0?'var(--red)':'var(--green)'}">${pd>0?'+':''}¥${Math.abs(pd).toLocaleString()}</div>
+        <div class="met-l">价格差</div>
+      </div>
+      <div class="met">
+        <div class="met-v" style="color:${sd>=0?'var(--green)':'var(--red)'}">${sd>=0?'+':''}${sd}</div>
+        <div class="met-l">综合分差</div>
+      </div>
+      <div class="met">
+        <div class="met-v" style="font-size:16px;color:${p1k&&p1k>=0.3?'var(--green)':p1k&&p1k>=0.25?'var(--amber)':'var(--red)'}">${p1k!==null?(p1k>0?'+':'')+p1k:'—'}</div>
+        <div class="met-l">分/千元</div>
+      </div>
     </div>
-    <div class="verd ${worth?'verd-y':'verd-n'}">
-      <div class="verd-t">${worth?'✅ 值得升级':'❌ 不建议升级'}</div>
+    <div class="verd ${verdClass}">
+      <div class="verd-t">${verdIcon} ${level==='strong'?'强烈推荐升级':level==='ok'?'可以升级':'不推荐升级'}</div>
       <div class="verd-b">${txt}</div>
     </div>
-    <div class="reason">当前阈值：每千元需提升 ≥ ${thr} 分才算"值得"，可在上方调整。</div>
+    <div class="reason">${reasonTxt}<br><span style="color:var(--text3)">判定标准：✅ 分差≥0.6且分/千元≥0.3 · 🟡 分差≥0.4且分/千元≥0.25 · ❌ 其他</span></div>
   </div>`;
 }
 
@@ -1345,6 +1398,155 @@ function getParamListForCat(cat) {
   const s = sch(cat);
   if (!s) return '';
   return '\n' + s.params.map(p => `- ${p.label}`).join('\n') + '\n- 各平台价格（京东/淘宝/拼多多/抖音）\n- 商品图片链接';
+}
+
+
+// ════════════════════════════════════════════════════════════
+// PASTE PARAMS AUTO-FILL
+// ════════════════════════════════════════════════════════════
+function parseAndFillParams(){
+  const raw = document.getElementById('paste-params').value;
+  if(!raw.trim()){ toast('请先粘贴参数文字'); return; }
+  const cat = document.getElementById('f-cat').value;
+  const s = sch(cat);
+  let filled = 0;
+
+  // 规则：针对每个参数字段尝试匹配
+  s.params.forEach(p => {
+    const el = document.getElementById('fp-' + p.key);
+    if(!el) return;
+    const val = matchParam(raw, p.key, p.label, p.type, p.opts);
+    if(val !== null){
+      el.value = val;
+      el.style.background = 'color-mix(in srgb, var(--accent-bg) 60%, var(--bg3))';
+      setTimeout(()=>el.style.background='', 2000);
+      filled++;
+    }
+  });
+
+  updatePreview();
+  toast(filled > 0 ? `✓ 自动填入 ${filled} 个参数，请检查并修改` : '未识别到匹配参数，请手动填写');
+}
+
+function matchParam(text, key, label, type, opts){
+  const t = text.toLowerCase();
+
+  // 数字型参数
+  if(type !== 'sel'){
+    const patterns = {
+      'weight': [/整车重量[：:]\s*(\d+\.?\d*)\s*kg/i, /重量[：:]\s*(\d+\.?\d*)\s*kg/i, /weight[：:]\s*(\d+\.?\d*)/i],
+      'stack': [/stack[：:]\s*(\d+)/i, /叠高[：:]\s*(\d+)/i],
+      'reach': [/reach[：:]\s*(\d+)/i, /前伸量[：:]\s*(\d+)/i],
+      'head_tube': [/头管[长度]*[：:]\s*(\d+)/i, /head\s*tube[：:]\s*(\d+)/i],
+      'top_tube': [/上管[有效长度]*[：:]\s*(\d+)/i, /top\s*tube[：:]\s*(\d+)/i, /有效上管[：:]\s*(\d+)/i],
+      'gears': [/(\d+)\s*速/, /速别[：:]\s*(\d+)/i, /变速[：:]\s*(\d+)\s*速/i],
+      'pressure': [/(\d+)\s*bar/i, /压力[：:]\s*(\d+)/i],
+      'drinks': [/(\d+)\s*[种款个]/],
+      'capacity': [/容量[：:]\s*(\d+)\s*ml/i, /(\d+)\s*ml/i],
+      'weight_fabric': [/克重[：:]\s*(\d+)/i, /面料.*?(\d+)\s*g/i, /(\d+)\s*g\s*\/?\s*㎡/i, /(\d+)gsm/i],
+    };
+    const pats = patterns[key] || [];
+    for(const pat of pats){
+      const m = text.match(pat);
+      if(m) return parseFloat(m[1]);
+    }
+    return null;
+  }
+
+  // 选择型参数
+  if(!opts) return null;
+  const keyPatterns = {
+    'groupset': {
+      'Dura-Ace（顶级）': /dura.?ace|da/i,
+      'Ultegra（次旗舰）': /ultegra/i,
+      '105（主流推荐）': /shimano\s*105|105/i,
+      'Tiagra（入门+）': /tiagra/i,
+      'Sora（入门）': /sora/i,
+      'Claris（基础）': /claris/i,
+      'Tourney（最基础）': /tourney/i,
+      'SRAM Red': /sram\s*red/i,
+      'SRAM Force': /sram\s*force/i,
+      'SRAM Rival': /sram\s*rival/i,
+    },
+    'frame': {
+      '高模碳纤维': /高模.*碳|t800|t900|高模量/i,
+      '标准碳纤维': /碳纤维|carbon|碳架/i,
+      '铝合金（高端）': /铝合金|6061|7005|alloy/i,
+      '铝合金（标准）': /铝|aluminum/i,
+      '铬钼钢': /铬钼|chromoly|cr.mo/i,
+      '钢': /钢|steel/i,
+    },
+    'brake': {
+      '油压碟刹': /油压碟|hydraulic\s*disc|油碟/i,
+      '机械碟刹': /机械碟|mechanical\s*disc|线碟/i,
+      '圈刹（双轴）': /圈刹|rim\s*brake|双轴/i,
+      '圈刹（直拉）': /直拉/i,
+    },
+    'drivetrain': {
+      '电子变速（Di2/eTap）': /di2|etap|电子变速|electronic/i,
+      '机械变速': /机械变速|mechanical/i,
+    },
+    'geo_type': {
+      '舒适耐力型': /耐力|endurance|舒适|comfort/i,
+      '均衡型': /均衡|all.?round|versatile/i,
+      '竞速型': /竞速|race|performance/i,
+      '极限竞速型': /极限|aero|pro\s*race/i,
+    },
+    'pid': { '有': /pid|有.*控温|精准.*温/i, '无': /无.*pid|无.*控温/i },
+    'boiler': {
+      '双锅炉': /双锅炉|dual\s*boiler/i,
+      '热交换锅炉': /热交换|heat\s*exchange|HX/i,
+      '单锅炉（大）': /单.*大锅炉|thermoblock/i,
+      '单锅炉（小）': /单锅炉|single\s*boiler/i,
+    },
+    'stretch': {
+      '四向弹力': /四向弹|4.?way|四面弹/i,
+      '双向弹力': /双向弹|2.?way/i,
+      '微弹': /微弹/i,
+      '无弹性': /无弹|不弹/i,
+    },
+    'upf': {
+      'UPF50+': /upf\s*50\+?/i,
+      'UPF40+': /upf\s*40\+?/i,
+      'UPF30+': /upf\s*30\+?/i,
+    },
+    'mosquito': {
+      '有防蚊涂层': /防蚊涂层|驱蚊/i,
+      '物理防蚊（密织）': /物理防蚊|密织/i,
+    },
+    'material': {
+      '尼龙+氨纶': /尼龙.*氨纶|nylon.*spandex|尼龙.*elastane/i,
+      '涤纶+氨纶': /涤纶.*氨纶|polyester.*spandex/i,
+      '尼龙': /尼龙|nylon|锦纶/i,
+      '涤纶': /涤纶|polyester/i,
+      '棉': /棉|cotton/i,
+    },
+    'mesh': {
+      '大面积网眼': /大.*网眼|大面积.*网/i,
+      '局部网眼': /网眼|mesh|透气孔/i,
+    },
+    'waterproof': {
+      'DWR防泼水': /dwr|防泼水|拒水/i,
+      '防水涂层': /防水涂层|waterproof/i,
+    },
+  };
+
+  const kp = keyPatterns[key];
+  if(kp){
+    for(const [optVal, pat] of Object.entries(kp)){
+      if(opts.includes(optVal) && pat.test(text)){
+        return optVal;
+      }
+    }
+  }
+
+  // 通用：检查选项文字是否直接出现在文本中
+  for(const opt of opts){
+    const clean = opt.replace(/[（）()【】]/g,'');
+    if(text.includes(clean) || text.includes(opt)) return opt;
+  }
+
+  return null;
 }
 
 function openAdd(){
