@@ -848,13 +848,46 @@ const SAMPLE=[
   {id:'s3',name:'牧高笛 防晒防蚊衣',cat:'防晒衣',price:199,status:'active',note:'户外专业款，有防蚊处理',img:'',prices:{jd:199,tb:189,pdd:179,dy:185},updated:'2026-05',params:{stretch:'双向弹力',weight_fabric:95,material:'尼龙',upf:'UPF50+',mosquito:'物理防蚊（密织）',mesh:'局部网眼',waterproof:'DWR防泼水'}},
 ];
 
+// ── 云端存储（Cloudflare KV） ──────────────────────────────
+const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+let cloudSynced = false;
+
+async function loadItemsCloud(){
+  try {
+    const r = await fetch('/api');
+    const json = await r.json();
+    if(json.ok && json.data && json.data.items && json.data.items.length > 0){
+      items = json.data.items;
+      if(json.data.weights) { W = json.data.weights; }
+      cloudSynced = true;
+      return true;
+    }
+  } catch(e) { console.warn('Cloud load failed:', e); }
+  return false;
+}
+
+async function saveCloud(){
+  try {
+    await fetch('/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, weights: W })
+    });
+    cloudSynced = true;
+  } catch(e) { console.warn('Cloud save failed:', e); }
+}
+
+// 保底 localStorage（离线备份）
 function loadItems(){
   const r=localStorage.getItem('sdi5');
   if(r){const d=JSON.parse(r);if(d&&d.length>0)return d;}
   localStorage.setItem('sdi5',JSON.stringify(SAMPLE));
   return JSON.parse(JSON.stringify(SAMPLE));
 }
-function saveItems(d){localStorage.setItem('sdi5',JSON.stringify(d));}
+function saveItems(d){
+  localStorage.setItem('sdi5',JSON.stringify(d));
+  saveCloud(); // 同步云端
+}
 let items=loadItems();
 
 // ════════════════════════════════════════════════════════════
@@ -1176,7 +1209,7 @@ function applyPreset(i,btn){
   W={...PRESETS[i].w};saveW(W);renderPrefs();btn.classList.add('active');
   toast('已应用「'+PRESETS[i].label+'」✓');
 }
-function savePrefs(){saveW(W);toast('偏好已保存 ✓');}
+function savePrefs(){saveW(W);saveCloud();toast('偏好已保存 ✓');}
 function resetPrefs(){W={...DEF_W};saveW(W);renderPrefs();toast('已恢复默认');}
 
 // ════════════════════════════════════════════════════════════
@@ -1664,10 +1697,33 @@ function switchTab(id,btn){
 // INIT
 // ════════════════════════════════════════════════════════════
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
-fillAll();
-renderPrefs();
-renderRec();
-updCount();
+
+// 启动：优先从云端加载
+(async () => {
+  // 显示加载状态
+  document.getElementById('rec-out').innerHTML =
+    '<div class="empty"><div class="empty-icon">☁️</div><p>正在从云端加载数据...</p></div>';
+
+  const ok = await loadItemsCloud();
+  if(ok){
+    // 云端有数据，同步到 localStorage
+    localStorage.setItem('sdi5', JSON.stringify(items));
+    saveW(W);
+  } else {
+    // 云端无数据，用本地数据并上传
+    console.log('Using local data, uploading to cloud...');
+    await saveCloud();
+  }
+
+  fillAll();
+  renderPrefs();
+  renderRec();
+  updCount();
+
+  // 状态指示
+  const badge = document.getElementById('item-count');
+  badge.title = ok ? '✓ 已连接云端' : '使用本地数据';
+})();
 </script>
 </body>
 </html>
