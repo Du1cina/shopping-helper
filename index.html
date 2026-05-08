@@ -1,430 +1,152 @@
+bash
+
+cat > /home/claude/index.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>购物决策助手</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #0e0e0f;
-  --bg2: #16161a;
-  --bg3: #1e1e24;
-  --bg4: #26262e;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #f0eee8;
-  --text2: #9896a0;
-  --text3: #5c5a66;
-  --accent: #7c6dfa;
-  --accent2: #9f94fb;
-  --accent-bg: rgba(124,109,250,0.12);
-  --green: #34d399;
-  --green-bg: rgba(52,211,153,0.1);
-  --green-border: rgba(52,211,153,0.25);
-  --red: #f87171;
-  --red-bg: rgba(248,113,113,0.1);
-  --red-border: rgba(248,113,113,0.25);
-  --amber: #fbbf24;
-  --amber-bg: rgba(251,191,36,0.1);
-  --amber-border: rgba(251,191,36,0.25);
-  --pink: #f472b6;
-  --blue: #60a5fa;
-  --r: 12px;
-  --rs: 8px;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 15px; }
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: 'Outfit', 'Noto Sans SC', sans-serif;
-  line-height: 1.6;
-  min-height: 100vh;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 2px; }
-
-.app { max-width: 860px; margin: 0 auto; padding: 0 20px 120px; }
-
-/* Header */
-header {
-  padding: 28px 0 20px;
-  margin-bottom: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  border-bottom: 1px solid var(--border);
-}
-.logo { display: flex; align-items: center; gap: 12px; }
-.logo-icon {
-  width: 38px; height: 38px;
-  background: linear-gradient(135deg, var(--accent), var(--pink));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-}
-.logo-text h1 { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; }
-.logo-text p { font-size: 11px; color: var(--text3); margin-top: 1px; }
-.header-right { display: flex; align-items: center; gap: 8px; }
-.badge {
-  font-size: 11px; font-weight: 500;
-  background: var(--bg3); border: 1px solid var(--border2);
-  color: var(--text2); padding: 4px 10px; border-radius: 20px;
-}
-
-/* Tabs */
-.tabs {
-  display: flex; gap: 2px;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 3px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.tabs::-webkit-scrollbar { display: none; }
-.tab {
-  flex: 1; min-width: 62px;
-  padding: 8px 10px;
-  font-size: 12px; font-weight: 500;
-  border: none; background: none;
-  color: var(--text3);
-  border-radius: 9px;
-  cursor: pointer;
-  transition: all .18s;
-  white-space: nowrap;
-  text-align: center;
-  font-family: inherit;
-}
-.tab.active {
-  background: var(--bg4);
-  color: var(--text);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-}
-.tab:hover:not(.active) { color: var(--text2); background: var(--bg3); }
-
-/* Sections */
-.section { display: none; animation: fadeIn .2s ease; }
-.section.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Cards */
-.card {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 18px;
-  margin-bottom: 14px;
-  transition: border-color .2s;
-}
-.card.hl { border-color: var(--accent); border-width: 1.5px; }
-.card.hl-green { border-color: var(--green); border-width: 1.5px; }
-.card-sm { padding: 13px 16px; }
-.card:hover { border-color: var(--border2); }
-.card.hl:hover { border-color: var(--accent); }
-.card.hl-green:hover { border-color: var(--green); }
-
-/* Form */
-label { font-size: 12px; color: var(--text2); font-weight: 500; display: block; margin-bottom: 6px; }
-select, input[type=text], input[type=number], input[type=url], textarea {
-  width: 100%; padding: 9px 12px;
-  font-size: 13px;
-  border: 1px solid var(--border2);
-  border-radius: var(--rs);
-  background: var(--bg3);
-  color: var(--text);
-  font-family: inherit;
-  transition: border .15s, background .15s;
-}
-select:focus, input:focus, textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  background: var(--bg4);
-}
-textarea { resize: vertical; min-height: 54px; }
-.g { display: grid; gap: 12px; margin-bottom: 14px; }
-.g2 { grid-template-columns: 1fr 1fr; }
-.g3 { grid-template-columns: 1fr 1fr 1fr; }
-.g4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-@media(max-width:560px) {
-  .g3 { grid-template-columns: 1fr 1fr; }
-  .g4 { grid-template-columns: 1fr 1fr; }
-}
-@media(max-width:380px) {
-  .g2 { grid-template-columns: 1fr; }
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px;
-  font-size: 13px; font-weight: 500;
-  border-radius: var(--rs);
-  border: 1px solid var(--border2);
-  background: var(--bg3);
-  color: var(--text);
-  cursor: pointer;
-  transition: all .15s;
-  font-family: inherit;
-  white-space: nowrap;
-}
-.btn:hover { background: var(--bg4); border-color: var(--border2); }
-.btn-p { background: var(--accent); color: #fff; border-color: var(--accent); }
-.btn-p:hover { background: var(--accent2); border-color: var(--accent2); opacity: 1; }
-.btn-d { color: var(--red); border-color: var(--red-border); }
-.btn-d:hover { background: var(--red-bg); }
-.btn-sm { padding: 5px 11px; font-size: 12px; }
-
-/* Tags */
-.tag {
-  display: inline-flex; align-items: center; gap: 3px;
-  font-size: 11px; font-weight: 600;
-  padding: 2px 8px; border-radius: 5px;
-  white-space: nowrap; letter-spacing: 0.1px;
-}
-.tag-best { background: var(--accent-bg); color: var(--accent2); border: 1px solid rgba(124,109,250,0.25); }
-.tag-val { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); }
-.tag-perf { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
-.tag-on { background: var(--green-bg); color: var(--green); }
-.tag-soon { background: var(--amber-bg); color: var(--amber); }
-.tag-off { background: var(--bg4); color: var(--text3); }
-
-/* Score bars */
-.srow { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.slbl { font-size: 11px; color: var(--text2); width: 64px; flex-shrink: 0; }
-.bbg { flex: 1; height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
-.bfill { height: 100%; border-radius: 3px; transition: width .5s cubic-bezier(.4,0,.2,1); }
-.snum { font-size: 12px; font-weight: 600; width: 26px; text-align: right; color: var(--text2); }
-
-/* Price chips */
-.pchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.pchip {
-  font-size: 11px; font-weight: 500;
-  padding: 3px 9px; border-radius: 5px;
-  border: 1px solid var(--border);
-  background: var(--bg3); color: var(--text2);
-}
-.pchip.low {
-  background: var(--green-bg);
-  border-color: var(--green-border);
-  color: var(--green);
-}
-
-/* Metric boxes */
-.mets { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 16px; }
-.met {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 12px;
-  text-align: center;
-}
-.met-v { font-size: 22px; font-weight: 700; }
-.met-l { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
-/* Verdict */
-.verd { border-radius: var(--r); padding: 16px 18px; margin-top: 14px; }
-.verd-y { background: var(--green-bg); border: 1px solid var(--green-border); }
-.verd-ok { background: var(--amber-bg); border: 1px solid var(--amber-border); }
-.verd-n { background: var(--red-bg); border: 1px solid var(--red-border); }
-.verd-t { font-size: 16px; font-weight: 700; margin-bottom: 5px; }
-.verd-y .verd-t { color: var(--green); }
-.verd-n .verd-t { color: var(--red); }
-.verd-b { font-size: 13px; line-height: 1.7; }
-.verd-y .verd-b { color: color-mix(in srgb, var(--green) 80%, var(--text)); }
-.verd-n .verd-b { color: color-mix(in srgb, var(--red) 80%, var(--text)); }
-
-/* Reason box */
-.reason {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 11px 14px;
-  margin-top: 12px;
-  font-size: 12px; color: var(--text2); line-height: 1.8;
-}
-
-/* Compare table */
-.cmp-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: var(--rs); }
-.cmp-t { width: 100%; border-collapse: collapse; font-size: 12px; min-width: 500px; }
-.cmp-t th {
-  text-align: left; padding: 10px 12px;
-  font-weight: 600; font-size: 11px; color: var(--text3);
-  border-bottom: 1px solid var(--border);
-  background: var(--bg3);
-  white-space: nowrap;
-}
-.cmp-t td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-.cmp-t tr:last-child td { border-bottom: none; }
-.cmp-t tr.tr-top td { background: rgba(124,109,250,0.06); }
-.bv { color: var(--green); font-weight: 700; }
-
-/* Pref sliders */
-.pref-row { margin-bottom: 18px; }
-.ph { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 7px; }
-.ph-val { font-weight: 700; color: var(--accent2); font-size: 14px; }
-input[type=range] { width: 100%; accent-color: var(--accent); cursor: pointer; height: 4px; }
-
-/* Preset buttons */
-.presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
-.preset {
-  padding: 7px 14px; font-size: 12px; font-weight: 500;
-  border-radius: 20px;
-  border: 1px solid var(--border2);
-  background: var(--bg3); color: var(--text2);
-  cursor: pointer; transition: all .15s; font-family: inherit;
-}
-.preset:hover { color: var(--text); border-color: var(--accent); }
-.preset.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-
-/* Modal */
-.mo {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
-  z-index: 100;
-  display: flex; align-items: center; justify-content: center;
-  padding: 16px;
-}
-.mo.hidden { display: none; }
-.mo-box {
-  background: var(--bg2);
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  padding: 24px;
-  width: 100%; max-width: 560px;
-  max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.5);
-}
-.mo-box h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.mo-sub { font-size: 12px; color: var(--text3); margin-bottom: 20px; }
-.mo-sec {
-  font-size: 12px; font-weight: 600; color: var(--text2);
-  margin: 18px 0 12px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border);
-  display: flex; align-items: center; gap: 6px;
-}
-.mo-ft {
-  display: flex; justify-content: flex-end; gap: 8px;
-  margin-top: 20px; padding-top: 16px;
-  border-top: 1px solid var(--border);
-}
-
-/* Image upload */
-.img-upload-area {
-  border: 2px dashed var(--border2);
-  border-radius: var(--rs);
-  padding: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition: all .2s;
-  background: var(--bg3);
-}
-.img-upload-area:hover { border-color: var(--accent); background: var(--accent-bg); }
-.img-upload-area.has-img { border-style: solid; border-color: var(--green-border); }
-.img-preview { width: 100%; max-height: 160px; object-fit: contain; border-radius: 6px; margin-top: 10px; display: none; }
-
-/* Item card in product display */
-.prod-img {
-  width: 100%; height: 140px;
-  object-fit: contain;
-  border-radius: var(--rs);
-  background: var(--bg3);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 14px;
-  overflow: hidden;
-}
-.prod-img img { width: 100%; height: 100%; object-fit: contain; }
-.prod-img-placeholder { color: var(--text3); font-size: 32px; }
-
-/* Score preview */
-.score-preview {
-  background: var(--accent-bg);
-  border: 1px solid rgba(124,109,250,0.25);
-  border-radius: var(--rs);
-  padding: 12px 14px;
-  margin-top: 12px;
-  font-size: 12px; color: var(--accent2); line-height: 2;
-}
-
-/* Admin list */
-.irow {
-  display: flex; justify-content: space-between; align-items: center;
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 12px 14px;
-  margin-bottom: 8px;
-  gap: 10px;
-  transition: border-color .15s;
-}
-.irow:hover { border-color: var(--border2); }
-.irow-left { display: flex; align-items: center; gap: 12px; }
-.irow-thumb {
-  width: 44px; height: 44px;
-  border-radius: 8px;
-  background: var(--bg4);
-  overflow: hidden; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 20px;
-}
-.irow-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.iname { font-size: 13px; font-weight: 600; }
-.imeta { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.iacts { display: flex; gap: 6px; flex-shrink: 0; }
-
-/* Price tab section */
-.price-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; }
-@media(max-width:480px) { .price-grid { grid-template-columns: repeat(2,1fr); } }
-.price-cell {
-  background: var(--bg3);
-  border: 1px solid var(--border);
-  border-radius: var(--rs);
-  padding: 10px 12px;
-  text-align: center;
-  transition: all .15s;
-}
-.price-cell.low-price {
-  background: var(--green-bg);
-  border-color: var(--green-border);
-}
-.price-cell-platform { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-.price-cell.low-price .price-cell-platform { color: var(--green); font-weight: 600; }
-.price-cell-val { font-size: 15px; font-weight: 700; }
-.price-cell.low-price .price-cell-val { color: var(--green); }
-
-/* Utility */
-hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
-.hint { font-size: 11px; color: var(--text3); line-height: 1.6; margin-top: 5px; }
-.stitle { font-size: 13px; font-weight: 600; color: var(--text2); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.empty { text-align: center; padding: 48px 20px; color: var(--text3); font-size: 13px; }
-.empty-icon { font-size: 36px; margin-bottom: 10px; }
-
-/* Toast */
-.toast {
-  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-  background: var(--bg4); color: var(--text);
-  border: 1px solid var(--border2);
-  padding: 10px 20px; border-radius: 24px;
-  font-size: 13px; font-weight: 500;
-  z-index: 200; opacity: 0; transition: opacity .2s;
-  pointer-events: none; white-space: nowrap;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-}
-.toast.show { opacity: 1; }
-
-/* Final score big number */
-.big-score { font-size: 32px; font-weight: 800; line-height: 1; }
+:root{--bg:#0e0e0f;--bg2:#16161a;--bg3:#1e1e24;--bg4:#26262e;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);--tx:#f0eee8;--tx2:#9896a0;--tx3:#5c5a66;--ac:#7c6dfa;--ac2:#9f94fb;--ac-bg:rgba(124,109,250,0.12);--gn:#34d399;--gn-bg:rgba(52,211,153,0.1);--gn-bd:rgba(52,211,153,0.25);--rd:#f87171;--rd-bg:rgba(248,113,113,0.1);--rd-bd:rgba(248,113,113,0.25);--am:#fbbf24;--am-bg:rgba(251,191,36,0.1);--am-bd:rgba(251,191,36,0.25);--pk:#f472b6;--bl:#60a5fa;--r:12px;--rs:8px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:15px;}
+body{background:var(--bg);color:var(--tx);font-family:-apple-system,'PingFang SC','Noto Sans SC',sans-serif;line-height:1.6;min-height:100vh;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:2px;}
+.app{max-width:900px;margin:0 auto;padding:0 18px 100px;}
+header{padding:22px 0 18px;border-bottom:1px solid var(--bd);margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo-icon{width:38px;height:38px;background:linear-gradient(135deg,var(--ac),var(--pk));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.logo-text h1{font-size:17px;font-weight:700;}
+.logo-text p{font-size:11px;color:var(--tx3);margin-top:1px;}
+.badge{font-size:11px;font-weight:500;background:var(--bg3);border:1px solid var(--bd2);color:var(--tx2);padding:4px 10px;border-radius:20px;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--tx3);display:inline-block;margin-right:5px;transition:background .3s;}
+.sync-dot.ok{background:var(--gn);}
+.sync-dot.err{background:var(--rd);}
+.tabs{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:3px;margin-bottom:20px;overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:56px;padding:8px 8px;font-size:12px;font-weight:500;border:none;background:none;color:var(--tx3);border-radius:9px;cursor:pointer;transition:all .15s;white-space:nowrap;text-align:center;font-family:inherit;}
+.tab.active{background:var(--bg4);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,0.3);}
+.tab:hover:not(.active){color:var(--tx2);background:var(--bg3);}
+.section{display:none;animation:fi .2s ease;}.section.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;margin-bottom:12px;transition:border-color .2s;}
+.card.hl{border-color:var(--ac);border-width:1.5px;}
+.card.hl-gn{border-color:var(--gn);border-width:1.5px;}
+.card-sm{padding:12px 15px;}
+label{font-size:12px;color:var(--tx2);font-weight:500;display:block;margin-bottom:5px;}
+select,input[type=text],input[type=number],textarea{width:100%;padding:8px 11px;font-size:13px;border:1px solid var(--bd2);border-radius:var(--rs);background:var(--bg3);color:var(--tx);font-family:inherit;transition:border .15s,background .15s;}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--ac);background:var(--bg4);}
+textarea{resize:vertical;min-height:52px;}
+.g{display:grid;gap:11px;margin-bottom:13px;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:1fr 1fr 1fr;}
+.g4{grid-template-columns:1fr 1fr 1fr 1fr;}
+@media(max-width:560px){.g3{grid-template-columns:1fr 1fr;}.g4{grid-template-columns:1fr 1fr;}}
+@media(max-width:400px){.g2{grid-template-columns:1fr;}}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;font-size:13px;font-weight:500;border-radius:var(--rs);border:1px solid var(--bd2);background:var(--bg3);color:var(--tx);cursor:pointer;transition:all .15s;font-family:inherit;white-space:nowrap;}
+.btn:hover{background:var(--bg4);}
+.btn-p{background:var(--ac);color:#fff;border-color:var(--ac);}
+.btn-p:hover{background:var(--ac2);border-color:var(--ac2);}
+.btn-d{color:var(--rd);border-color:var(--rd-bd);}
+.btn-d:hover{background:var(--rd-bg);}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.tag{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:2px 8px;border-radius:5px;white-space:nowrap;}
+.tag-best{background:var(--ac-bg);color:var(--ac2);border:1px solid rgba(124,109,250,0.25);}
+.tag-val{background:var(--gn-bg);color:var(--gn);border:1px solid var(--gn-bd);}
+.tag-perf{background:var(--am-bg);color:var(--am);border:1px solid var(--am-bd);}
+.tag-on{background:var(--gn-bg);color:var(--gn);}
+.tag-soon{background:var(--am-bg);color:var(--am);}
+.tag-off{background:var(--bg4);color:var(--tx3);}
+.srow{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+.slbl{font-size:11px;color:var(--tx2);width:68px;flex-shrink:0;}
+.bbg{flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;}
+.bfill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.snum{font-size:12px;font-weight:600;width:26px;text-align:right;color:var(--tx2);}
+.pchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.pchip{font-size:11px;font-weight:500;padding:3px 9px;border-radius:5px;border:1px solid var(--bd);background:var(--bg3);color:var(--tx2);}
+.pchip.low{background:var(--gn-bg);border-color:var(--gn-bd);color:var(--gn);}
+.mets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
+.met{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:12px;text-align:center;}
+.met-v{font-size:22px;font-weight:700;}
+.met-l{font-size:11px;color:var(--tx3);margin-top:2px;}
+.verd{border-radius:var(--r);padding:15px 18px;margin-top:14px;}
+.verd-y{background:var(--gn-bg);border:1px solid var(--gn-bd);}
+.verd-ok{background:var(--am-bg);border:1px solid var(--am-bd);}
+.verd-n{background:var(--rd-bg);border:1px solid var(--rd-bd);}
+.verd-t{font-size:16px;font-weight:700;margin-bottom:5px;}
+.verd-y .verd-t{color:var(--gn);}.verd-ok .verd-t{color:var(--am);}.verd-n .verd-t{color:var(--rd);}
+.verd-b{font-size:13px;line-height:1.7;}
+.verd-y .verd-b{color:color-mix(in srgb,var(--gn) 80%,var(--tx));}
+.verd-ok .verd-b{color:color-mix(in srgb,var(--am) 80%,var(--tx));}
+.verd-n .verd-b{color:color-mix(in srgb,var(--rd) 80%,var(--tx));}
+.reason{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 14px;margin-top:12px;font-size:12px;color:var(--tx2);line-height:1.8;}
+/* 竖列对比 */
+.cmp-cards{display:flex;flex-direction:column;gap:10px;}
+.cmp-row{display:grid;gap:0;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;}
+.cmp-row.top-row{border-color:var(--ac);}
+.cmp-cell-header{background:var(--bg3);padding:10px 14px;font-size:12px;font-weight:600;color:var(--tx3);display:flex;align-items:center;gap:8px;}
+.cmp-cell-header img{width:32px;height:32px;object-fit:contain;border-radius:6px;background:var(--bg4);}
+.cmp-cell-header .icon-fallback{width:32px;height:32px;background:var(--bg4);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.cmp-dims{padding:12px 14px;display:flex;flex-direction:column;gap:6px;}
+.cmp-dim-row{display:flex;align-items:center;gap:10px;}
+.cmp-dim-lbl{font-size:11px;color:var(--tx2);width:70px;flex-shrink:0;}
+.cmp-dim-bar{flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.cmp-dim-fill{height:100%;border-radius:2px;}
+.cmp-dim-val{font-size:11px;font-weight:600;width:22px;text-align:right;}
+.cmp-dim-val.bv{color:var(--gn);}
+.cmp-meta{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--bd);}
+.cmp-price{font-size:16px;font-weight:700;}
+.cmp-score{font-size:22px;font-weight:800;}
+.top-row .cmp-score{color:var(--ac2);}
+.pref-row{margin-bottom:16px;}
+.ph{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;}
+.ph-val{font-weight:700;color:var(--ac2);font-size:14px;}
+input[type=range]{width:100%;accent-color:var(--ac);cursor:pointer;}
+.presets{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.preset{padding:7px 14px;font-size:12px;font-weight:500;border-radius:20px;border:1px solid var(--bd2);background:var(--bg3);color:var(--tx2);cursor:pointer;transition:all .15s;font-family:inherit;}
+.preset:hover{color:var(--tx);border-color:var(--ac);}
+.preset.active{background:var(--ac);color:#fff;border-color:var(--ac);}
+.pref-group{margin-bottom:20px;}
+.pref-group-title{font-size:11px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--bd);}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;}
+.mo.hidden{display:none;}
+.mo-box{background:var(--bg2);border:1px solid var(--bd2);border-radius:16px;padding:22px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,0.5);}
+.mo-box h2{font-size:16px;font-weight:700;margin-bottom:4px;}
+.mo-sub{font-size:12px;color:var(--tx3);margin-bottom:18px;}
+.mo-sec{font-size:12px;font-weight:600;color:var(--tx2);margin:16px 0 10px;padding-top:14px;border-top:1px solid var(--bd);}
+.mo-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid var(--bd);}
+.img-area{border:2px dashed var(--bd2);border-radius:var(--rs);padding:18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3);}
+.img-area:hover{border-color:var(--ac);background:var(--ac-bg);}
+.img-area.has-img{border-style:solid;border-color:var(--gn-bd);}
+.img-preview{width:100%;max-height:150px;object-fit:contain;border-radius:6px;margin-top:8px;display:none;}
+.prod-img{width:100%;height:130px;object-fit:contain;border-radius:var(--rs);background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-bottom:12px;overflow:hidden;font-size:32px;}
+.prod-img img{width:100%;height:100%;object-fit:contain;}
+.score-preview{background:var(--ac-bg);border:1px solid rgba(124,109,250,0.25);border-radius:var(--rs);padding:11px 14px;margin-top:10px;font-size:12px;color:var(--ac2);line-height:2;}
+.irow{display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:11px 14px;margin-bottom:8px;gap:10px;transition:border-color .15s;}
+.irow:hover{border-color:var(--bd2);}
+.irow-left{display:flex;align-items:center;gap:12px;}
+.irow-thumb{width:44px;height:44px;border-radius:8px;background:var(--bg4);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.irow-thumb img{width:100%;height:100%;object-fit:cover;}
+.iname{font-size:13px;font-weight:600;}
+.imeta{font-size:11px;color:var(--tx3);margin-top:2px;}
+.iacts{display:flex;gap:6px;flex-shrink:0;}
+.price-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+@media(max-width:480px){.price-grid{grid-template-columns:repeat(2,1fr);}}
+.price-cell{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;text-align:center;}
+.price-cell.low{background:var(--gn-bg);border-color:var(--gn-bd);}
+.pcell-plat{font-size:11px;color:var(--tx3);margin-bottom:4px;}
+.price-cell.low .pcell-plat{color:var(--gn);font-weight:600;}
+.pcell-val{font-size:15px;font-weight:700;}
+.price-cell.low .pcell-val{color:var(--gn);}
+hr{border:none;border-top:1px solid var(--bd);margin:14px 0;}
+.hint{font-size:11px;color:var(--tx3);line-height:1.6;margin-top:4px;}
+.stitle{font-size:13px;font-weight:600;color:var(--tx2);margin-bottom:12px;}
+.empty{text-align:center;padding:44px 20px;color:var(--tx3);font-size:13px;}
+.empty-icon{font-size:34px;margin-bottom:10px;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--bg4);color:var(--tx);border:1px solid var(--bd2);padding:10px 20px;border-radius:24px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.toast.show{opacity:1;}
 </style>
 </head>
 <body>
@@ -432,13 +154,10 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
   <header>
     <div class="logo">
       <div class="logo-icon">🛍</div>
-      <div class="logo-text">
-        <h1>购物决策助手</h1>
-        <p>最适合你 · 是否值得升级</p>
-      </div>
+      <div class="logo-text"><h1>购物决策助手</h1><p>最适合你 · 是否值得升级</p></div>
     </div>
-    <div class="header-right">
-      <span class="badge" id="item-count">0 件商品</span>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="badge"><span class="sync-dot" id="sync-dot"></span><span id="item-count">0 件</span></span>
     </div>
   </header>
 
@@ -451,19 +170,17 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     <button class="tab" onclick="switchTab('adm',this)">管理商品</button>
   </div>
 
-  <!-- 推荐 -->
   <div class="section active" id="tab-rec">
     <div class="card card-sm">
       <div class="g g3">
         <div><label>品类</label><select id="rec-cat" onchange="renderRec()"></select></div>
-        <div><label>预算上限（元）</label><input type="number" id="rec-budget" value="1000" min="50" step="100" oninput="renderRec()"></div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:2px"><p class="hint">系统自动匹配最适合你的三款</p></div>
+        <div><label>预算上限（元）</label><input type="number" id="rec-budget" value="3500" min="100" step="100" oninput="renderRec()"></div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px"><p class="hint">系统按你的偏好自动匹配最佳三款</p></div>
       </div>
     </div>
     <div id="rec-out"></div>
   </div>
 
-  <!-- 对比 -->
   <div class="section" id="tab-cmp">
     <div class="card card-sm" style="margin-bottom:14px">
       <div><label>品类</label><select id="cmp-cat" onchange="renderCmp()"></select></div>
@@ -471,7 +188,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     <div id="cmp-out"></div>
   </div>
 
-  <!-- 升级分析 -->
   <div class="section" id="tab-upg">
     <div class="card card-sm" style="margin-bottom:14px">
       <div class="g g2" style="margin-bottom:12px">
@@ -481,8 +197,8 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
         <div><label>我现在用的</label><select id="upg-from" onchange="renderUpg()"></select></div>
         <div><label>想换到</label><select id="upg-to" onchange="renderUpg()"></select></div>
       </div>
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--text2);line-height:2">
-        <b style="color:var(--text)">判定标准：</b><br>
+      <div style="background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 14px;font-size:12px;color:var(--tx2);line-height:2">
+        <b style="color:var(--tx)">判定标准：</b><br>
         ✅ <b>强烈推荐</b>：分差 ≥ 0.6 且 分差/千元 ≥ 0.3<br>
         🟡 <b>可以升级</b>：分差 ≥ 0.4 且 分差/千元 ≥ 0.25<br>
         ❌ <b>不推荐</b>：其他情况
@@ -491,7 +207,6 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     <div id="upg-out"></div>
   </div>
 
-  <!-- 比价 -->
   <div class="section" id="tab-prc">
     <div class="card card-sm" style="margin-bottom:14px">
       <div><label>品类</label><select id="prc-cat" onchange="renderPrc()"></select></div>
@@ -499,10 +214,9 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     <div id="prc-out"></div>
   </div>
 
-  <!-- 偏好 -->
   <div class="section" id="tab-prf">
     <div class="card">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:14px">选择偏好模式，或手动调整各维度权重（影响所有评分和推荐）：</p>
+      <p style="font-size:13px;color:var(--tx2);margin-bottom:14px">设置你对各方面的重视程度，影响所有品类的推荐和对比结果：</p>
       <div class="presets" id="presets-wrap"></div>
       <div id="prf-sliders"></div>
       <hr>
@@ -513,24 +227,20 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
     </div>
     <div class="card card-sm">
       <p class="stitle">⚙️ 算法说明</p>
-      <p style="font-size:12px;color:var(--text2);line-height:2">
-        <b style="color:var(--text)">自动评分</b>：填入官网客观参数，系统按品类规则换算为 0–10 分，无需手动打分。<br>
-        <b style="color:var(--text)">综合评分</b> = Σ(维度分 × 偏好权重) ÷ 权重总和 ÷ 价格效用因子<br>
-        <b style="color:var(--text)">升级价值</b> = 综合分差 ÷ |价格差| × 1000（分/千元）
+      <p style="font-size:12px;color:var(--tx2);line-height:2">
+        <b style="color:var(--tx)">自动评分</b>：填入客观参数，系统按品类规则换算 0–10 分，无需手动打分。<br>
+        <b style="color:var(--tx)">综合评分</b> = Σ(维度分 × 偏好权重) ÷ 权重总和 ÷ 价格效用因子<br>
+        <b style="color:var(--tx)">升级判定</b>：✅ 分差≥0.6且分/千元≥0.3 · 🟡 分差≥0.4且分/千元≥0.25
       </p>
     </div>
   </div>
 
-  <!-- 管理商品 -->
   <div class="section" id="tab-adm">
-    <div class="card card-sm" style="margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-      <div>
-        <p style="font-size:13px;font-weight:600">商品库</p>
-        <p class="hint">数据存本地浏览器，换设备请先导出备份</p>
-      </div>
+    <div class="card card-sm" style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <div><p style="font-size:13px;font-weight:600">商品库</p><p class="hint">数据同步云端，换设备自动加载</p></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-sm" onclick="exportData()">📤 导出备份</button>
-        <button class="btn btn-sm" onclick="document.getElementById('imp-file').click()">📥 导入恢复</button>
+        <button class="btn btn-sm" onclick="exportData()">📤 导出</button>
+        <button class="btn btn-sm" onclick="document.getElementById('imp-file').click()">📥 导入</button>
         <input type="file" id="imp-file" accept=".json" style="display:none" onchange="importData(this)">
         <button class="btn btn-p btn-sm" onclick="openAdd()">＋ 添加商品</button>
       </div>
@@ -543,53 +253,33 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
 <div class="mo hidden" id="modal">
   <div class="mo-box">
     <h2 id="mo-title">添加商品</h2>
-    <p class="mo-sub">填入官网参数，系统自动计算各维度评分</p>
-
-    <!-- URL 智能识别 -->
-    <div style="margin-bottom:16px">
-      <label>🔗 粘贴商品链接（自动识别平台，辅助填写）</label>
-      <div style="display:flex;gap:8px;align-items:stretch">
-        <input type="url" id="f-url" placeholder="粘贴京东 / 淘宝 / 拼多多 / 抖音商城链接..." oninput="detectUrl(this.value)" style="flex:1">
-        <button class="btn btn-sm" onclick="copyUrlForClaude()" style="white-space:nowrap;flex-shrink:0">🤖 让Claude帮填</button>
-      </div>
-      <div id="url-detect-result" style="display:none;margin-top:8px;padding:10px 12px;background:var(--accent-bg);border:1px solid rgba(124,109,250,0.25);border-radius:var(--rs);font-size:12px;color:var(--accent2);line-height:1.8"></div>
-    </div>
-
+    <p class="mo-sub">填入客观参数，系统自动计算评分</p>
     <div class="g g2">
-      <div><label>商品名称 *</label><input type="text" id="f-name" placeholder="如：蕉下防晒衣"></div>
+      <div><label>商品名称 *</label><input type="text" id="f-name" placeholder="如：迪卡侬 RC520"></div>
       <div><label>品类 *</label>
         <select id="f-cat" onchange="buildParamFields()">
           <option>公路车</option>
           <option>意式浓缩机</option>
           <option>全自动咖啡机</option>
           <option>手冲/滴滤机</option>
-          <option selected>防晒衣</option>
+          <option>防晒衣</option>
         </select>
       </div>
     </div>
     <div class="g g3">
-      <div><label>价格（元）*</label><input type="number" id="f-price" placeholder="299" min="1" oninput="updatePreview()"></div>
-      <div><label>状态</label>
-        <select id="f-status"><option value="active">在售</option><option value="eol-soon">即将停产</option><option value="eol">已停产</option></select>
-      </div>
-      <div><label>备注</label><input type="text" id="f-note" placeholder="特色亮点..."></div>
+      <div><label>价格（元）*</label><input type="number" id="f-price" placeholder="2999" min="1" oninput="updatePreview()"></div>
+      <div><label>状态</label><select id="f-status"><option value="active">在售</option><option value="eol-soon">即将停产</option><option value="eol">已停产</option></select></div>
+      <div><label>备注</label><input type="text" id="f-note" placeholder="特色..."></div>
     </div>
-
-    <!-- Image upload -->
-    <div style="margin-bottom:14px">
+    <div style="margin-bottom:12px">
       <label>商品图片（可选）</label>
-      <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('f-img-file').click()">
-        <div id="img-upload-hint">
-          <div style="font-size:24px;margin-bottom:6px">📷</div>
-          <div style="font-size:12px;color:var(--text3)">点击上传图片，或粘贴图片链接</div>
-        </div>
+      <div class="img-area" id="img-area" onclick="document.getElementById('f-img-file').click()">
+        <div id="img-hint" style="font-size:12px;color:var(--tx3)">📷 点击上传图片</div>
         <img id="img-preview" class="img-preview">
       </div>
-      <input type="file" id="f-img-file" accept="image/*" style="display:none" onchange="handleImgUpload(this)">
-      <input type="url" id="f-img-url" placeholder="或粘贴图片链接 https://..." style="margin-top:8px" oninput="handleImgUrl(this)">
+      <input type="file" id="f-img-file" accept="image/*" style="display:none" onchange="handleImg(this)">
       <input type="hidden" id="f-img-data">
     </div>
-
     <p class="mo-sec">🏷️ 各平台价格（可选）</p>
     <div class="g g4">
       <div><label>京东</label><input type="number" id="fp-jd" placeholder="—" min="0"></div>
@@ -597,310 +287,350 @@ hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
       <div><label>拼多多</label><input type="number" id="fp-pdd" placeholder="—" min="0"></div>
       <div><label>抖音商城</label><input type="number" id="fp-dy" placeholder="—" min="0"></div>
     </div>
-
-    <p class="mo-sec">📊 品类参数 <span style="font-weight:400;color:var(--text3);font-size:11px">不知道可留空，系统用中间值处理</span></p>
-    <div style="margin-bottom:10px">
+    <p class="mo-sec">📊 品类参数</p>
+    <div style="margin-bottom:12px">
       <div style="display:flex;gap:8px;align-items:flex-start">
-        <textarea id="paste-params" placeholder="粘贴商品参数文字，自动识别填入↓
-例如：
-整车重量：8.7kg
-变速套件：Shimano 105
-刹车：机械碟刹
-Stack：535mm
-Reach：388mm" style="flex:1;min-height:80px;font-size:12px"></textarea>
-        <button class="btn btn-sm" onclick="parseAndFillParams()" style="flex-shrink:0;align-self:flex-start;margin-top:0">⚡ 自动填入</button>
+        <textarea id="paste-params" placeholder="粘贴官网参数文字，自动识别填入↓&#10;例如：整车重量：9.5kg&#10;变速套件：Shimano Claris&#10;刹车：机械碟刹" style="flex:1;min-height:72px;font-size:12px"></textarea>
+        <button class="btn btn-sm" onclick="parseAndFill()" style="flex-shrink:0">⚡ 自动填</button>
       </div>
-      <p class="hint">支持任意格式的参数文字，复制官网规格页粘贴即可</p>
+      <p class="hint">复制官网规格页粘贴即可，支持中英文混合</p>
     </div>
     <div id="param-fields"></div>
     <div id="score-preview" style="display:none" class="score-preview"></div>
-
     <div class="mo-ft">
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-p" onclick="saveItem()">保存商品</button>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════════
-// SCHEMAS — 品类参数和自动评分规则
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// SCHEMAS
+// ════════════════════════════════════════════════════
 const SCHEMAS = {
-  '公路车': {
-    dims: ['骑姿舒适度','传动系统','轮组','整车重量','刹车','性价比'],
-    colors: {'骑姿舒适度':'#34d399','传动系统':'#60a5fa','轮组':'#a78bfa','整车重量':'#fbbf24','刹车':'#f87171','性价比':'#f472b6'},
-    wkeys: {'骑姿舒适度':'perf','传动系统':'perf','轮组':'portable','整车重量':'portable','刹车':'quality','性价比':'value'},
-    // 维度说明（用于界面展示）
-    dimDesc: {
-      '骑姿舒适度':'腰累不累 · 能否骑远 · 新手友好度',
-      '传动系统':'换挡顺滑 · 卡顿风险 · 使用寿命',
-      '轮组':'起步轻快 · 巡航省力 · 长途表现',
-      '整车重量':'搬车 · 爬坡 · 心理感受',
-      '刹车':'下坡安全 · 雨天表现',
-      '性价比':'综合性价比'
-    },
-    params: [
-      // 骑姿舒适度
-      {key:'stack',label:'Stack（mm）',ph:'560',hint:'越大越直立舒适，耐力型>560mm；越小越趴低竞速'},
-      {key:'reach',label:'Reach（mm）',ph:'385',hint:'越小越舒适，新手建议<390mm'},
-      {key:'head_tube',label:'头管长度（mm）',ph:'130',hint:'越长骑姿越直立，舒适度越高'},
-      {key:'top_tube',label:'上管有效长度（mm）',ph:'540',hint:'影响俯身程度，越短越舒适'},
-      {key:'geo_type',label:'几何风格',type:'sel',opts:['舒适耐力型','均衡型','竞速型','极限竞速型'],hint:'直接影响骑姿和舒适度'},
-      // 传动系统
-      {key:'groupset',label:'变速套件',type:'sel',opts:['Dura-Ace（顶级）','Ultegra（次旗舰）','105（主流推荐）','Tiagra（入门+）','Sora（入门）','Claris（基础）','Tourney（最基础）','SRAM Red','SRAM Force','SRAM Rival','其他'],hint:'Shimano 105 是性价比分水岭'},
-      {key:'gears',label:'总速别',ph:'22',hint:'如：11速×2盘=22速；速别越多适应坡度越广'},
-      {key:'drivetrain',label:'传动形式',type:'sel',opts:['机械变速','电子变速（Di2/eTap）'],hint:'电子变速换挡精准无需调整'},
-      // 轮组
-      {key:'wheelset',label:'轮组品牌/类型',type:'sel',opts:['碳纤维轻量轮组（品牌）','铝合金高端轮组（品牌）','铝合金标准轮组','OEM入门轮组'],hint:'轮组对骑感影响非常大'},
-      {key:'hub',label:'花鼓品牌',type:'sel',opts:['Shimano（禧玛诺）','Campagnolo','Chris King','DT Swiss','原厂OEM','不明'],hint:'好花鼓转动顺滑、使用寿命长'},
-      {key:'rim_type',label:'轮圈形式',type:'sel',opts:['无内胎（Tubeless）','内胎式','管胎'],hint:'无内胎防扎胎性好，骑感更佳'},
-      // 重量
-      {key:'weight',label:'整车重量（kg）',ph:'9.0',hint:'竞赛车约7kg，入门铝车约9-10kg'},
-      {key:'frame',label:'车架材质',type:'sel',opts:['高模碳纤维','标准碳纤维','铝合金（高端）','铝合金（标准）','铬钼钢','钢'],hint:'碳纤维轻且吸振，铝合金性价比高'},
-      // 刹车
-      {key:'brake',label:'刹车类型',type:'sel',opts:['油压碟刹','机械碟刹','圈刹（双轴）','圈刹（直拉）'],hint:'油压碟刹制动力最强，雨天最稳定'},
-    ],
-    score(p,price){
-      // === 骑姿舒适度 ===
-      const geoS={'舒适耐力型':10,'均衡型':7.5,'竞速型':5,'极限竞速型':2.5};
-      let comfort = geoS[p.geo_type] ?? 6;
-      // Stack 调整：越高越舒适
-      if(p.stack){ const stackAdj=(p.stack-520)/80*2; comfort=Math.min(10,Math.max(1,comfort+stackAdj*0.3)); }
-      // Reach 调整：越短越舒适
-      if(p.reach){ const reachAdj=(410-p.reach)/40*1.5; comfort=Math.min(10,Math.max(1,comfort+reachAdj*0.2)); }
-      if(p.head_tube){ const htAdj=(p.head_tube-100)/80*1.5; comfort=Math.min(10,Math.max(1,comfort+htAdj*0.15)); }
+'公路车':{
+  dims:['骑姿舒适度','传动系统','轮组','整车重量','刹车','性价比'],
+  colors:{'骑姿舒适度':'#34d399','传动系统':'#60a5fa','轮组':'#a78bfa','整车重量':'#fbbf24','刹车':'#f87171','性价比':'#f472b6'},
+  wkeys:{'骑姿舒适度':'comfort','传动系统':'perf','轮组':'perf','整车重量':'portable','刹车':'safety','性价比':'value'},
+  dimDesc:{'骑姿舒适度':'腰累不累·能骑远·新手友好','传动系统':'换挡顺滑·卡顿风险','轮组':'起步轻快·巡航省力','整车重量':'搬车·爬坡','刹车':'下坡安全·雨天表现','性价比':'综合性价比'},
+  params:[
+    {key:'geo_type',label:'几何风格',type:'sel',opts:['舒适耐力型','均衡型','竞速型','极限竞速型'],hint:'直接决定骑姿，耐力型更适合周末休闲'},
+    {key:'stack',label:'Stack（mm）',ph:'555',hint:'越大骑姿越直立，休闲骑推荐>545mm'},
+    {key:'reach',label:'Reach（mm）',ph:'385',hint:'越小越舒适，休闲骑推荐<390mm'},
+    {key:'head_tube',label:'头管长度（mm）',ph:'130',hint:'越长越舒适'},
+    {key:'groupset',label:'变速套件',type:'sel',opts:['Shimano Dura-Ace','Shimano Ultegra','Shimano 105','Shimano Tiagra','Shimano Sora','Shimano Claris','Shimano Tourney','SRAM Red','SRAM Force','SRAM Rival','SRAM Apex','蓝图 A070','蓝图 A050','microSHIFT Advent','其他入门套件'],hint:'Claris/Sora 适合2000-3500元预算'},
+    {key:'gears',label:'总速别',ph:'16',hint:'如8速×2盘=16速'},
+    {key:'drivetrain',label:'传动形式',type:'sel',opts:['机械变速','电子变速（Di2/eTap）']},
+    {key:'wheelset',label:'轮组类型',type:'sel',opts:['碳纤维品牌轮组','铝合金品牌轮组（禧玛诺/DT）','铝合金标准轮组','OEM入门轮组'],hint:'轮组对骑感影响很大'},
+    {key:'hub',label:'花鼓品牌',type:'sel',opts:['Shimano（禧玛诺）','DT Swiss','Chris King','原厂OEM','不明']},
+    {key:'rim_type',label:'轮胎形式',type:'sel',opts:['无内胎（Tubeless）','内胎式','管胎']},
+    {key:'weight',label:'整车重量（kg）',ph:'9.5',hint:'入门铝车约9-10kg，碳车约7-8kg'},
+    {key:'frame',label:'车架材质',type:'sel',opts:['高模碳纤维','标准碳纤维','铝合金（高端）','铝合金（标准）','铬钼钢','钢']},
+    {key:'brake',label:'刹车类型',type:'sel',opts:['油压碟刹','线拉油碟','机械碟刹','圈刹（双轴）','圈刹（直拉）'],hint:'线拉油碟：线拉驱动+油压卡钳，性价比高'},
+  ],
+  score(p,price){
+    // 几何舒适度
+    const geoS={'舒适耐力型':10,'均衡型':7.5,'竞速型':5,'极限竞速型':2.5};
+    let comfort=geoS[p.geo_type]??6;
+    if(p.stack){comfort=Math.min(10,Math.max(1,comfort+(p.stack-530)/80*1.5));}
+    if(p.reach){comfort=Math.min(10,Math.max(1,comfort+(400-p.reach)/40*1.2));}
+    if(p.head_tube){comfort=Math.min(10,Math.max(1,comfort+(p.head_tube-100)/80*0.8));}
 
-      // === 传动系统 ===
-      const gsS={'Dura-Ace（顶级）':10,'Ultegra（次旗舰）':8.5,'105（主流推荐）':7,'Tiagra（入门+）':5.5,'Sora（入门）':4.5,'Claris（基础）':3.5,'Tourney（最基础）':2,'SRAM Red':10,'SRAM Force':8,'SRAM Rival':6.5,'其他':4};
-      const gsScore=gsS[p.groupset]??5;
-      const gearScore=p.gears?Math.min(10,3+(p.gears-14)/16*5):5;
-      const diS={'电子变速（Di2/eTap）':10,'机械变速':7};
-      const diScore=diS[p.drivetrain]??7;
-      const drivetrain=gsScore*0.55+gearScore*0.25+diScore*0.2;
+    // 变速套件——性能分和性价比分分开
+    const gsPerf={'Shimano Dura-Ace':10,'Shimano Ultegra':8.5,'Shimano 105':7.2,'Shimano Tiagra':6.0,'Shimano Sora':5.2,'Shimano Claris':4.5,'Shimano Tourney':3.2,'SRAM Red':10,'SRAM Force':8.5,'SRAM Rival':7.0,'SRAM Apex':5.8,'蓝图 A070':4.8,'蓝图 A050':3.8,'microSHIFT Advent':4.5,'其他入门套件':3.0};
+    const gsVal={'Shimano Dura-Ace':3,'Shimano Ultegra':5,'Shimano 105':8,'Shimano Tiagra':7.5,'Shimano Sora':8,'Shimano Claris':8.5,'Shimano Tourney':7,'SRAM Red':3,'SRAM Force':5,'SRAM Rival':7,'SRAM Apex':8,'蓝图 A070':9,'蓝图 A050':8.5,'microSHIFT Advent':8,'其他入门套件':7};
+    const gsP=gsPerf[p.groupset]??5,gsV=gsVal[p.groupset]??7;
+    const gearS=p.gears?Math.min(10,3+(p.gears-6)/14*6):5;
+    const diS={'电子变速（Di2/eTap）':10,'机械变速':7};
+    const drivetrain=gsP*0.6+gearS*0.25+(diS[p.drivetrain]??7)*0.15;
 
-      // === 轮组 ===
-      const wlS={'碳纤维轻量轮组（品牌）':10,'铝合金高端轮组（品牌）':7.5,'铝合金标准轮组':5,'OEM入门轮组':3};
-      const hubS={'Shimano（禧玛诺）':7,'Campagnolo':8,'Chris King':10,'DT Swiss':9,'原厂OEM':4,'不明':4};
-      const rimS={'无内胎（Tubeless）':10,'内胎式':6,'管胎':8};
-      const wheelset=(wlS[p.wheelset]??5)*0.5+(hubS[p.hub]??4)*0.3+(rimS[p.rim_type]??6)*0.2;
+    // 轮组
+    const wlP={'碳纤维品牌轮组':10,'铝合金品牌轮组（禧玛诺/DT）':8,'铝合金标准轮组':5.5,'OEM入门轮组':3.5};
+    const wlV={'碳纤维品牌轮组':3,'铝合金品牌轮组（禧玛诺/DT）':6,'铝合金标准轮组':8,'OEM入门轮组':7.5};
+    const hubS={'Shimano（禧玛诺）':8,'DT Swiss':9,'Chris King':10,'原厂OEM':4.5,'不明':4};
+    const rimS={'无内胎（Tubeless）':10,'内胎式':6.5,'管胎':8};
+    const wheelPerf=(wlP[p.wheelset]??5)*0.55+(hubS[p.hub]??4.5)*0.3+(rimS[p.rim_type]??6.5)*0.15;
+    const wheelVal=(wlV[p.wheelset]??7)*0.6+(hubS[p.hub]??4.5)*0.25+(rimS[p.rim_type]??6.5)*0.15;
 
-      // === 整车重量 ===
-      const frS={'高模碳纤维':10,'标准碳纤维':8,'铝合金（高端）':6.5,'铝合金（标准）':5,'铬钼钢':4,'钢':3};
-      const frScore=frS[p.frame]??5;
-      const wtScore=p.weight?Math.max(0,Math.min(10,(12-p.weight)/5*10)):5;
-      const weightDim=wtScore*0.65+frScore*0.35;
+    // 重量
+    const frP={'高模碳纤维':10,'标准碳纤维':8.5,'铝合金（高端）':7,'铝合金（标准）':5.5,'铬钼钢':4,'钢':3};
+    const frV={'高模碳纤维':4,'标准碳纤维':5,'铝合金（高端）':7,'铝合金（标准）':8.5,'铬钼钢':7,'钢':6};
+    const wtS=p.weight?Math.max(0,Math.min(10,(12.5-p.weight)/5*10)):5;
+    const weightDim=wtS*0.65+(frP[p.frame]??5.5)*0.35;
 
-      // === 刹车 ===
-      const brS={'油压碟刹':10,'机械碟刹':7,'圈刹（双轴）':5,'圈刹（直拉）':4};
-      const brake=brS[p.brake]??5;
+    // 刹车——性能分和性价比分
+    const brP={'油压碟刹':10,'线拉油碟':8,'机械碟刹':6.5,'圈刹（双轴）':5,'圈刹（直拉）':4};
+    const brV={'油压碟刹':6,'线拉油碟':9,'机械碟刹':8,'圈刹（双轴）':8,'圈刹（直拉）':7};
+    const brakePerf=brP[p.brake]??6;
+    const brakeVal=brV[p.brake]??7;
 
-      // === 性价比 ===
-      const raw=(comfort*0.30+wheelset*0.25+drivetrain*0.20+frScore*0.15+brake*0.05+wtScore*0.05);
-      const pf=Math.log10((price||3000)/1000+1)*4;
-      const value=Math.min(10,raw/pf*3);
+    // 性价比综合
+    const perfRaw=comfort*0.30+wheelPerf*0.25+drivetrain*0.20+(frP[p.frame]??5.5)*0.15+brakePerf*0.05+wtS*0.05;
+    const valRaw=gsV*0.35+wheelVal*0.25+brakeVal*0.2+(frV[p.frame]??7)*0.1+7*0.1;
+    const pf=Math.log10((price||3000)/1000+1)*3.5;
+    const value=Math.min(10,valRaw/pf*2.8);
 
-      return {
-        '骑姿舒适度':+Math.min(10,comfort).toFixed(1),
-        '传动系统':+Math.min(10,drivetrain).toFixed(1),
-        '轮组':+Math.min(10,wheelset).toFixed(1),
-        '整车重量':+Math.min(10,weightDim).toFixed(1),
-        '刹车':+Math.min(10,brake).toFixed(1),
-        '性价比':+value.toFixed(1)
-      };
-    }
-  },
-  '意式浓缩机': {
-    dims: ['萃取质量','功能性','易用性','性价比'],
-    colors: {'萃取质量':'#34d399','功能性':'#fbbf24','易用性':'#a78bfa','性价比':'#f472b6'},
-    wkeys: {'萃取质量':'perf','功能性':'quality','易用性':'quality','性价比':'value'},
-    params: [
-      {key:'pressure',label:'最大压力（bar）',ph:'15',hint:'9bar标准萃取，15bar以上更常见'},
-      {key:'boiler',label:'锅炉类型',type:'sel',opts:['双锅炉','热交换锅炉','单锅炉（大）','单锅炉（小）'],hint:'双锅炉可同时萃取+蒸奶'},
-      {key:'pid',label:'PID精准控温',type:'sel',opts:['有','无'],hint:'有PID温度更稳定'},
-      {key:'grinder',label:'内置磨豆机',type:'sel',opts:['有（锥刀）','有（平刀）','无']},
-      {key:'preinfusion',label:'预浸泡',type:'sel',opts:['自动','手动','无'],hint:'让萃取更均匀'},
-      {key:'steam',label:'蒸汽棒',type:'sel',opts:['专业蒸汽棒','自动奶泡','Panarello棒','无']},
-    ],
-    score(p,price){
-      const blrS={'双锅炉':10,'热交换锅炉':7.5,'单锅炉（大）':5.5,'单锅炉（小）':3.5};
-      const pidS={'有':10,'无':5};const preS={'自动':10,'手动':7,'无':4};
-      const grS={'有（锥刀）':10,'有（平刀）':8,'无':3};
-      const stS={'专业蒸汽棒':10,'自动奶泡':7,'Panarello棒':5,'无':2};
-      const pressS=p.pressure?Math.min(10,3+(p.pressure-9)*0.7):6;
-      const ext=Math.min(10,(blrS[p.boiler]??5)*0.35+(pidS[p.pid]??7)*0.3+pressS*0.2+(preS[p.preinfusion]??4)*0.15);
-      const func=Math.min(10,(grS[p.grinder]??3)*0.4+(stS[p.steam]??5)*0.3+(preS[p.preinfusion]??4)*0.3);
-      const ease=Math.min(10,4+(grS[p.grinder]??3>3?2:0)+(blrS[p.boiler]??5>7?1:0));
-      const pf=Math.log10((price||3000)/1000+1)*3.5;
-      return {'萃取质量':+ext.toFixed(1),'功能性':+func.toFixed(1),'易用性':+ease.toFixed(1),'性价比':+Math.min(10,(ext+func+ease)/3/pf*3).toFixed(1)};
-    }
-  },
-  '全自动咖啡机': {
-    dims: ['咖啡质量','易用性','功能性','性价比'],
-    colors: {'咖啡质量':'#34d399','易用性':'#a78bfa','功能性':'#fbbf24','性价比':'#f472b6'},
-    wkeys: {'咖啡质量':'perf','易用性':'quality','功能性':'quality','性价比':'value'},
-    params: [
-      {key:'grinder',label:'磨豆机类型',type:'sel',opts:['陶瓷锥刀','金属锥刀','钢刀','无/胶囊'],hint:'锥刀研磨更均匀'},
-      {key:'drinks',label:'饮品种类数',ph:'6'},
-      {key:'screen',label:'操控方式',type:'sel',opts:['彩色触摸屏','单色触摸屏','旋钮+按键','纯按键']},
-      {key:'milk',label:'奶泡系统',type:'sel',opts:['全自动一键拿铁','半自动蒸汽棒','无']},
-      {key:'clean',label:'自动清洁',type:'sel',opts:['全自动','半自动','手动']},
-    ],
-    score(p,price){
-      const grS={'陶瓷锥刀':10,'金属锥刀':8,'钢刀':6,'无/胶囊':3};
-      const scS={'彩色触摸屏':10,'单色触摸屏':7,'旋钮+按键':6,'纯按键':4};
-      const mlS={'全自动一键拿铁':10,'半自动蒸汽棒':6,'无':2};
-      const clS={'全自动':10,'半自动':6,'手动':3};
-      const dkS=p.drinks?Math.min(10,2+p.drinks*0.9):5;
-      const qual=Math.min(10,(grS[p.grinder]??5)*0.5+dkS*0.3+(mlS[p.milk]??2)*0.2);
-      const ease=Math.min(10,(scS[p.screen]??5)*0.4+(clS[p.clean]??5)*0.4+(mlS[p.milk]??2)*0.2);
-      const func=Math.min(10,dkS*0.4+(mlS[p.milk]??2)*0.3+(clS[p.clean]??5)*0.3);
-      const pf=Math.log10((price||2000)/1000+1)*3.5;
-      return {'咖啡质量':+qual.toFixed(1),'易用性':+ease.toFixed(1),'功能性':+func.toFixed(1),'性价比':+Math.min(10,(qual+ease+func)/3/pf*3).toFixed(1)};
-    }
-  },
-  '手冲/滴滤机': {
-    dims: ['萃取质量','易用性','便携性','性价比'],
-    colors: {'萃取质量':'#34d399','易用性':'#a78bfa','便携性':'#60a5fa','性价比':'#f472b6'},
-    wkeys: {'萃取质量':'perf','易用性':'quality','便携性':'portable','性价比':'value'},
-    params: [
-      {key:'type',label:'类型',type:'sel',opts:['电动手冲一体机','手动手冲壶','滴滤咖啡机','胶囊机','摩卡壶']},
-      {key:'temp',label:'温控',type:'sel',opts:['精确PID','可调段位','固定温度','无控温'],hint:'水温影响萃取风味'},
-      {key:'filter',label:'滤杯类型',type:'sel',opts:['锥形滤纸','梯形滤纸','金属滤网','胶囊']},
-      {key:'capacity',label:'容量（ml）',ph:'500'},
-    ],
-    score(p,price){
-      const tpS={'电动手冲一体机':9,'手动手冲壶':8,'滴滤咖啡机':7,'胶囊机':5,'摩卡壶':7};
-      const tmS={'精确PID':10,'可调段位':7,'固定温度':5,'无控温':3};
-      const flS={'锥形滤纸':9,'梯形滤纸':7,'金属滤网':8,'胶囊':5};
-      const ptS={'手动手冲壶':9,'摩卡壶':8,'胶囊机':7,'滴滤咖啡机':5,'电动手冲一体机':6};
-      const capS=p.capacity?Math.min(10,3+p.capacity/100):5;
-      const qual=Math.min(10,(tpS[p.type]??5)*0.3+(tmS[p.temp]??5)*0.4+(flS[p.filter]??6)*0.3);
-      const ease=Math.min(10,(tpS[p.type]??5)*0.5+(tmS[p.temp]??5)*0.3+capS*0.2);
-      const port=Math.min(10,(ptS[p.type]??6)*0.7+capS*0.3);
-      const pf=Math.log10((price||500)/1000+1)*4;
-      return {'萃取质量':+qual.toFixed(1),'易用性':+ease.toFixed(1),'便携性':+port.toFixed(1),'性价比':+Math.min(10,(qual+ease+port)/3/pf*3).toFixed(1)};
-    }
-  },
-  '防晒衣': {
-    dims: ['活动性','透气性','耐用性','防护力','性价比'],
-    colors: {'活动性':'#34d399','透气性':'#60a5fa','耐用性':'#fbbf24','防护力':'#a78bfa','性价比':'#f472b6'},
-    wkeys: {'活动性':'perf','透气性':'portable','耐用性':'quality','防护力':'quality','性价比':'value'},
-    params: [
-      {key:'stretch',label:'弹性类型',type:'sel',opts:['四向弹力','双向弹力','微弹','无弹性'],hint:'户外作业推荐四向弹，动作最自由'},
-      {key:'weight_fabric',label:'面料克重（g/㎡）',ph:'88',hint:'越低越透气，80以下凉感佳，120以上更耐磨'},
-      {key:'material',label:'主要面料',type:'sel',opts:['尼龙+氨纶','涤纶+氨纶','尼龙','涤纶','棉'],hint:'尼龙最耐磨，加氨纶有弹性'},
-      {key:'upf',label:'UPF指数',type:'sel',opts:['UPF50+','UPF40+','UPF30+','未标注'],hint:'户外工作建议UPF50+'},
-      {key:'mosquito',label:'防蚊处理',type:'sel',opts:['有防蚊涂层','物理防蚊（密织）','无'],hint:'户外作业有防蚊更舒适'},
-      {key:'mesh',label:'腋下/背部网眼',type:'sel',opts:['大面积网眼','局部网眼','无网眼'],hint:'网眼区域散热快'},
-      {key:'waterproof',label:'防水处理',type:'sel',opts:['DWR防泼水','防水涂层','无'],hint:'应对汗水和小雨'},
-    ],
-    score(p,price){
-      const stS={'四向弹力':10,'双向弹力':7,'微弹':5,'无弹性':2};
-      const mtS={'尼龙+氨纶':10,'涤纶+氨纶':9,'尼龙':8,'涤纶':6,'棉':3};
-      const mqS={'有防蚊涂层':10,'物理防蚊（密织）':7,'无':2};
-      const mshS={'大面积网眼':10,'局部网眼':6,'无网眼':3};
-      const upfS={'UPF50+':10,'UPF40+':7,'UPF30+':5,'未标注':2};
-      const wpS={'DWR防泼水':8,'防水涂层':6,'无':3};
-      const wgS=p.weight_fabric?Math.max(0,Math.min(10,(150-p.weight_fabric)/70*10)):5;
-      const agile=Math.min(10,(stS[p.stretch]??5)*0.7+(mtS[p.material]??7)*0.3);
-      const breath=Math.min(10,wgS*0.6+(mshS[p.mesh]??5)*0.4);
-      const dur=Math.min(10,(mtS[p.material]??7)*0.5+(wpS[p.waterproof]??4)*0.3+(stS[p.stretch]??5)*0.2);
-      const protect=Math.min(10,(upfS[p.upf]??5)*0.5+(mqS[p.mosquito]??2)*0.5);
-      const raw=(agile+breath+dur+protect)/4;
-      const pf=Math.log10((price||200)/100+1)*3;
-      return {'活动性':+agile.toFixed(1),'透气性':+breath.toFixed(1),'耐用性':+dur.toFixed(1),'防护力':+protect.toFixed(1),'性价比':+Math.min(10,raw/pf*2.5).toFixed(1)};
-    }
+    return{
+      '骑姿舒适度':+Math.min(10,comfort).toFixed(1),
+      '传动系统':+Math.min(10,drivetrain).toFixed(1),
+      '轮组':+Math.min(10,wheelPerf).toFixed(1),
+      '整车重量':+Math.min(10,weightDim).toFixed(1),
+      '刹车':+Math.min(10,brakePerf).toFixed(1),
+      '性价比':+Math.min(10,value).toFixed(1)
+    };
   }
+},
+'意式浓缩机':{
+  dims:['萃取质量','功能性','易用性','性价比'],
+  colors:{'萃取质量':'#34d399','功能性':'#fbbf24','易用性':'#a78bfa','性价比':'#f472b6'},
+  wkeys:{'萃取质量':'perf','功能性':'quality','易用性':'comfort','性价比':'value'},
+  params:[
+    {key:'pressure',label:'最大压力（bar）',ph:'15',hint:'9bar标准，15bar有过压阀更稳'},
+    {key:'boiler',label:'锅炉类型',type:'sel',opts:['双锅炉','热交换锅炉','单锅炉（大）','单锅炉（小）'],hint:'双锅炉可同时萃取+蒸奶'},
+    {key:'pid',label:'PID控温',type:'sel',opts:['有','无']},
+    {key:'grinder',label:'内置磨豆机',type:'sel',opts:['有（锥刀）','有（平刀）','无']},
+    {key:'preinfusion',label:'预浸泡',type:'sel',opts:['自动','手动','无']},
+    {key:'steam',label:'蒸汽棒',type:'sel',opts:['专业蒸汽棒','自动奶泡','Panarello棒','无']},
+  ],
+  score(p,price){
+    const blrS={'双锅炉':10,'热交换锅炉':7.5,'单锅炉（大）':5.5,'单锅炉（小）':3.5};
+    const pidS={'有':10,'无':5};const preS={'自动':10,'手动':7,'无':4};
+    const grS={'有（锥刀）':10,'有（平刀）':8,'无':3};
+    const stS={'专业蒸汽棒':10,'自动奶泡':7,'Panarello棒':5,'无':2};
+    const pressS=p.pressure?Math.min(10,3+(p.pressure-9)*0.7):6;
+    const ext=Math.min(10,(blrS[p.boiler]??5)*0.35+(pidS[p.pid]??7)*0.3+pressS*0.2+(preS[p.preinfusion]??4)*0.15);
+    const func=Math.min(10,(grS[p.grinder]??3)*0.4+(stS[p.steam]??5)*0.3+(preS[p.preinfusion]??4)*0.3);
+    const ease=Math.min(10,4+(grS[p.grinder]??3>3?2:0)+(blrS[p.boiler]??5>7?1:0));
+    const pf=Math.log10((price||3000)/1000+1)*3.5;
+    return{'萃取质量':+ext.toFixed(1),'功能性':+func.toFixed(1),'易用性':+ease.toFixed(1),'性价比':+Math.min(10,(ext+func+ease)/3/pf*3).toFixed(1)};
+  }
+},
+'全自动咖啡机':{
+  dims:['咖啡质量','易用性','功能性','性价比'],
+  colors:{'咖啡质量':'#34d399','易用性':'#a78bfa','功能性':'#fbbf24','性价比':'#f472b6'},
+  wkeys:{'咖啡质量':'perf','易用性':'comfort','功能性':'quality','性价比':'value'},
+  params:[
+    {key:'grinder',label:'磨豆机类型',type:'sel',opts:['陶瓷锥刀','金属锥刀','钢刀','无/胶囊']},
+    {key:'drinks',label:'饮品种类数',ph:'6'},
+    {key:'screen',label:'操控方式',type:'sel',opts:['彩色触摸屏','单色触摸屏','旋钮+按键','纯按键']},
+    {key:'milk',label:'奶泡系统',type:'sel',opts:['全自动一键拿铁','半自动蒸汽棒','无']},
+    {key:'clean',label:'自动清洁',type:'sel',opts:['全自动','半自动','手动']},
+  ],
+  score(p,price){
+    const grS={'陶瓷锥刀':10,'金属锥刀':8,'钢刀':6,'无/胶囊':3};
+    const scS={'彩色触摸屏':10,'单色触摸屏':7,'旋钮+按键':6,'纯按键':4};
+    const mlS={'全自动一键拿铁':10,'半自动蒸汽棒':6,'无':2};
+    const clS={'全自动':10,'半自动':6,'手动':3};
+    const dkS=p.drinks?Math.min(10,2+p.drinks*0.9):5;
+    const qual=Math.min(10,(grS[p.grinder]??5)*0.5+dkS*0.3+(mlS[p.milk]??2)*0.2);
+    const ease=Math.min(10,(scS[p.screen]??5)*0.4+(clS[p.clean]??5)*0.4+(mlS[p.milk]??2)*0.2);
+    const func=Math.min(10,dkS*0.4+(mlS[p.milk]??2)*0.3+(clS[p.clean]??5)*0.3);
+    const pf=Math.log10((price||2000)/1000+1)*3.5;
+    return{'咖啡质量':+qual.toFixed(1),'易用性':+ease.toFixed(1),'功能性':+func.toFixed(1),'性价比':+Math.min(10,(qual+ease+func)/3/pf*3).toFixed(1)};
+  }
+},
+'手冲/滴滤机':{
+  dims:['萃取质量','易用性','便携性','性价比'],
+  colors:{'萃取质量':'#34d399','易用性':'#a78bfa','便携性':'#60a5fa','性价比':'#f472b6'},
+  wkeys:{'萃取质量':'perf','易用性':'comfort','便携性':'portable','性价比':'value'},
+  params:[
+    {key:'type',label:'类型',type:'sel',opts:['电动手冲一体机','手动手冲壶','滴滤咖啡机','胶囊机','摩卡壶']},
+    {key:'temp',label:'温控',type:'sel',opts:['精确PID','可调段位','固定温度','无控温']},
+    {key:'filter',label:'滤杯类型',type:'sel',opts:['锥形滤纸','梯形滤纸','金属滤网','胶囊']},
+    {key:'capacity',label:'容量（ml）',ph:'500'},
+  ],
+  score(p,price){
+    const tpS={'电动手冲一体机':9,'手动手冲壶':8,'滴滤咖啡机':7,'胶囊机':5,'摩卡壶':7};
+    const tmS={'精确PID':10,'可调段位':7,'固定温度':5,'无控温':3};
+    const flS={'锥形滤纸':9,'梯形滤纸':7,'金属滤网':8,'胶囊':5};
+    const ptS={'手动手冲壶':9,'摩卡壶':8,'胶囊机':7,'滴滤咖啡机':5,'电动手冲一体机':6};
+    const capS=p.capacity?Math.min(10,3+p.capacity/100):5;
+    const qual=Math.min(10,(tpS[p.type]??5)*0.3+(tmS[p.temp]??5)*0.4+(flS[p.filter]??6)*0.3);
+    const ease=Math.min(10,(tpS[p.type]??5)*0.5+(tmS[p.temp]??5)*0.3+capS*0.2);
+    const port=Math.min(10,(ptS[p.type]??6)*0.7+capS*0.3);
+    const pf=Math.log10((price||500)/1000+1)*4;
+    return{'萃取质量':+qual.toFixed(1),'易用性':+ease.toFixed(1),'便携性':+port.toFixed(1),'性价比':+Math.min(10,(qual+ease+port)/3/pf*3).toFixed(1)};
+  }
+},
+'防晒衣':{
+  dims:['活动性','透气性','耐用性','防护力','性价比'],
+  colors:{'活动性':'#34d399','透气性':'#60a5fa','耐用性':'#fbbf24','防护力':'#a78bfa','性价比':'#f472b6'},
+  wkeys:{'活动性':'perf','透气性':'portable','耐用性':'quality','防护力':'safety','性价比':'value'},
+  params:[
+    {key:'stretch',label:'弹性类型',type:'sel',opts:['四向弹力','双向弹力','微弹','无弹性'],hint:'户外作业推荐四向弹'},
+    {key:'weight_fabric',label:'面料克重（g/㎡）',ph:'88',hint:'越低越透气，80以下凉感佳'},
+    {key:'material',label:'主要面料',type:'sel',opts:['尼龙+氨纶','涤纶+氨纶','尼龙','涤纶','棉']},
+    {key:'upf',label:'UPF指数',type:'sel',opts:['UPF50+','UPF40+','UPF30+','未标注']},
+    {key:'mosquito',label:'防蚊处理',type:'sel',opts:['有防蚊涂层','物理防蚊（密织）','无']},
+    {key:'mesh',label:'腋下/背部网眼',type:'sel',opts:['大面积网眼','局部网眼','无网眼']},
+    {key:'waterproof',label:'防水处理',type:'sel',opts:['DWR防泼水','防水涂层','无']},
+  ],
+  score(p,price){
+    const stS={'四向弹力':10,'双向弹力':7,'微弹':5,'无弹性':2};
+    const mtS={'尼龙+氨纶':10,'涤纶+氨纶':9,'尼龙':8,'涤纶':6,'棉':3};
+    const mqS={'有防蚊涂层':10,'物理防蚊（密织）':7,'无':2};
+    const mshS={'大面积网眼':10,'局部网眼':6,'无网眼':3};
+    const upfS={'UPF50+':10,'UPF40+':7,'UPF30+':5,'未标注':2};
+    const wpS={'DWR防泼水':8,'防水涂层':6,'无':3};
+    const wgS=p.weight_fabric?Math.max(0,Math.min(10,(150-p.weight_fabric)/70*10)):5;
+    const agile=Math.min(10,(stS[p.stretch]??5)*0.7+(mtS[p.material]??7)*0.3);
+    const breath=Math.min(10,wgS*0.6+(mshS[p.mesh]??5)*0.4);
+    const dur=Math.min(10,(mtS[p.material]??7)*0.5+(wpS[p.waterproof]??4)*0.3+(stS[p.stretch]??5)*0.2);
+    const protect=Math.min(10,(upfS[p.upf]??5)*0.5+(mqS[p.mosquito]??2)*0.5);
+    const raw=(agile+breath+dur+protect)/4;
+    const pf=Math.log10((price||200)/100+1)*3;
+    return{'活动性':+agile.toFixed(1),'透气性':+breath.toFixed(1),'耐用性':+dur.toFixed(1),'防护力':+protect.toFixed(1),'性价比':+Math.min(10,raw/pf*2.5).toFixed(1)};
+  }
+}
 };
 
-// ════════════════════════════════════════════════════════════
-// WEIGHTS
-// ════════════════════════════════════════════════════════════
-const PRESETS=[
-  {label:'均衡',w:{perf:6,value:6,quality:6,portable:6}},
-  {label:'性能优先',w:{perf:10,value:3,quality:7,portable:4}},
-  {label:'性价比优先',w:{perf:5,value:10,quality:5,portable:5}},
-  {label:'耐用优先',w:{perf:5,value:5,quality:10,portable:5}},
+// ════════════════════════════════════════════════════
+// 全品类通用偏好系统
+// ════════════════════════════════════════════════════
+const PREF_GROUPS = {
+  '骑行 / 运动':[
+    {key:'comfort',label:'舒适度（骑姿、人体工学）',desc:'骑远不累、新手友好'},
+    {key:'perf',label:'性能（速度、传动、轻量）',desc:'追求骑行表现'},
+    {key:'safety',label:'安全性（刹车、稳定）',desc:'下坡、雨天可靠'},
+  ],
+  '通用':[
+    {key:'value',label:'性价比',desc:'同价位中更出色'},
+    {key:'quality',label:'耐用性 / 功能丰富度',desc:'用得久、功能全'},
+    {key:'portable',label:'轻量 / 便携 / 透气',desc:'携带方便、不沉重'},
+  ],
+};
+
+const PRESETS_DATA=[
+  {label:'均衡',w:{comfort:6,perf:6,value:6,quality:6,portable:6,safety:6}},
+  {label:'舒适优先',w:{comfort:10,perf:4,value:7,quality:6,portable:5,safety:7}},
+  {label:'性能优先',w:{comfort:4,perf:10,value:4,quality:7,portable:5,safety:6}},
+  {label:'性价比优先',w:{comfort:6,perf:5,value:10,quality:6,portable:5,safety:5}},
+  {label:'耐用优先',w:{comfort:6,perf:5,value:6,quality:10,portable:4,safety:6}},
+  {label:'休闲骑行',w:{comfort:10,perf:4,value:8,quality:6,portable:5,safety:8}},
 ];
-const DKM={'性能':'perf','活动性':'perf','萃取质量':'perf','咖啡质量':'perf','骑姿舒适度':'perf','传动系统':'perf','轮组':'portable','轻量':'portable','便携性':'portable','透气性':'portable','整车重量':'portable','刹车':'quality','耐用性':'quality','功能性':'quality','易用性':'quality','防护力':'quality','性价比':'value'};
-const DEF_W={perf:7,value:8,quality:6,portable:5};
-const W_LABELS={perf:'性能 / 活动性',value:'性价比',quality:'耐用 / 功能 / 防护',portable:'轻量 / 透气 / 便携'};
+const DEF_W={comfort:7,perf:6,value:8,quality:6,portable:5,safety:6};
 const PLAT={jd:'京东',tb:'淘宝',pdd:'拼多多',dy:'抖音'};
 
-function loadW(){const r=localStorage.getItem('sdw5');return r?JSON.parse(r):{...DEF_W};}
-function saveW(w){localStorage.setItem('sdw5',JSON.stringify(w));}
+function loadW(){const r=localStorage.getItem('sdw6');return r?JSON.parse(r):{...DEF_W};}
+function saveW(w){localStorage.setItem('sdw6',JSON.stringify(w));}
 let W=loadW();
 
-// ════════════════════════════════════════════════════════════
-// SAMPLE DATA
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 预置10款公路车
+// ════════════════════════════════════════════════════
 const SAMPLE=[
-  {id:'r1',name:'捷安特 TCR Advanced 2',cat:'公路车',price:8500,status:'active',note:'铝车架竞速入门',img:'',prices:{jd:8500,tb:8300,pdd:8100,dy:null},updated:'2026-05',params:{stack:535,reach:388,head_tube:120,geo_type:'竞速型',groupset:'105（主流推荐）',gears:22,drivetrain:'机械变速',wheelset:'铝合金高端轮组（品牌）',hub:'Shimano（禧玛诺）',rim_type:'内胎式',weight:8.7,frame:'铝合金（高端）',brake:'机械碟刹'}},
-  {id:'r2',name:'Trek Émonda SL 5',cat:'公路车',price:12800,status:'active',note:'碳纤维轻量爬坡',img:'',prices:{jd:12800,tb:12500,pdd:null,dy:null},updated:'2026-05',params:{stack:545,reach:382,head_tube:130,geo_type:'均衡型',groupset:'105（主流推荐）',gears:22,drivetrain:'机械变速',wheelset:'铝合金高端轮组（品牌）',hub:'Shimano（禧玛诺）',rim_type:'内胎式',weight:7.5,frame:'标准碳纤维',brake:'机械碟刹'}},
-  {id:'r3',name:'美利达 Scultura 400',cat:'公路车',price:4200,status:'active',note:'入门竞速性价比高',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:3950},updated:'2026-05',params:{stack:525,reach:395,head_tube:110,geo_type:'均衡型',groupset:'Claris（基础）',gears:16,drivetrain:'机械变速',wheelset:'铝合金标准轮组',hub:'原厂OEM',rim_type:'内胎式',weight:9.5,frame:'铝合金（标准）',brake:'圈刹（双轴）'}},
-  {id:'c1',name:'德龙 Dedica EC685',cat:'意式浓缩机',price:999,status:'active',note:'入门意式小巧便宜',img:'',prices:{jd:999,tb:899,pdd:849,dy:929},updated:'2026-05',params:{pressure:15,boiler:'单锅炉（小）',pid:'无',grinder:'无',preinfusion:'无',steam:'Panarello棒'}},
-  {id:'c2',name:'Breville Barista Express',cat:'意式浓缩机',price:4200,status:'active',note:'内置磨豆机一体机',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:null},updated:'2026-05',params:{pressure:15,boiler:'单锅炉（大）',pid:'有',grinder:'有（锥刀）',preinfusion:'手动',steam:'专业蒸汽棒'}},
-  {id:'s1',name:'迪卡侬 UV Protect',cat:'防晒衣',price:149,status:'active',note:'基础款性价比高',img:'',prices:{jd:149,tb:139,pdd:129,dy:135},updated:'2026-05',params:{stretch:'双向弹力',weight_fabric:110,material:'涤纶',upf:'UPF50+',mosquito:'无',mesh:'局部网眼',waterproof:'无'}},
-  {id:'s2',name:'蕉下 轻弹系列',cat:'防晒衣',price:299,status:'active',note:'轻薄弹力，品牌口碑好',img:'',prices:{jd:299,tb:279,pdd:259,dy:269},updated:'2026-05',params:{stretch:'四向弹力',weight_fabric:88,material:'尼龙+氨纶',upf:'UPF50+',mosquito:'无',mesh:'局部网眼',waterproof:'DWR防泼水'}},
-  {id:'s3',name:'牧高笛 防晒防蚊衣',cat:'防晒衣',price:199,status:'active',note:'户外专业款，有防蚊处理',img:'',prices:{jd:199,tb:189,pdd:179,dy:185},updated:'2026-05',params:{stretch:'双向弹力',weight_fabric:95,material:'尼龙',upf:'UPF50+',mosquito:'物理防蚊（密织）',mesh:'局部网眼',waterproof:'DWR防泼水'}},
+  {id:'b01',name:'迪卡侬 RC120',cat:'公路车',price:1999,status:'active',note:'入门首选，官方调校稳定',img:'',prices:{jd:1999,tb:1999,pdd:1899,dy:null},updated:'2026-05',
+   params:{geo_type:'舒适耐力型',stack:560,reach:378,head_tube:145,groupset:'Shimano Claris',gears:16,drivetrain:'机械变速',wheelset:'OEM入门轮组',hub:'不明',rim_type:'内胎式',weight:10.5,frame:'铝合金（标准）',brake:'机械碟刹'}},
+
+  {id:'b02',name:'迪卡侬 RC520',cat:'公路车',price:2999,status:'active',note:'Sora套件，迪卡侬性价比标杆',img:'',prices:{jd:2999,tb:2999,pdd:2899,dy:null},updated:'2026-05',
+   params:{geo_type:'均衡型',stack:550,reach:382,head_tube:135,groupset:'Shimano Sora',gears:18,drivetrain:'机械变速',wheelset:'铝合金标准轮组',hub:'原厂OEM',rim_type:'内胎式',weight:9.6,frame:'铝合金（标准）',brake:'机械碟刹'}},
+
+  {id:'b03',name:'美利达 公爵 400',cat:'公路车',price:2799,status:'active',note:'Claris套件，几何偏舒适',img:'',prices:{jd:2799,tb:2699,pdd:2650,dy:null},updated:'2026-05',
+   params:{geo_type:'舒适耐力型',stack:558,reach:376,head_tube:150,groupset:'Shimano Claris',gears:16,drivetrain:'机械变速',wheelset:'铝合金标准轮组',hub:'原厂OEM',rim_type:'内胎式',weight:10.2,frame:'铝合金（标准）',brake:'圈刹（双轴）'}},
+
+  {id:'b04',name:'捷安特 CONTEND AR 3',cat:'公路车',price:3299,status:'active',note:'宽胎公路，舒适且防颠，Sora套件',img:'',prices:{jd:3299,tb:3299,pdd:3199,dy:null},updated:'2026-05',
+   params:{geo_type:'舒适耐力型',stack:562,reach:379,head_tube:148,groupset:'Shimano Sora',gears:18,drivetrain:'机械变速',wheelset:'铝合金标准轮组',hub:'原厂OEM',rim_type:'内胎式',weight:9.8,frame:'铝合金（高端）',brake:'机械碟刹'}},
+
+  {id:'b05',name:'崔克 Domane AL 2',cat:'公路车',price:4499,status:'active',note:'耐力几何，IsoSpeed减震，新手友好',img:'',prices:{jd:4499,tb:4499,pdd:null,dy:null},updated:'2026-05',
+   params:{geo_type:'舒适耐力型',stack:565,reach:380,head_tube:152,groupset:'Shimano Claris',gears:16,drivetrain:'机械变速',wheelset:'铝合金标准轮组',hub:'原厂OEM',rim_type:'内胎式',weight:10.2,frame:'铝合金（高端）',brake:'机械碟刹'}},
+
+  {id:'b06',name:'捷安特 TCR Advanced 2',cat:'公路车',price:8500,status:'active',note:'碳架竞速，105套件',img:'',prices:{jd:8500,tb:8300,pdd:null,dy:null},updated:'2026-05',
+   params:{geo_type:'竞速型',stack:535,reach:388,head_tube:120,groupset:'Shimano 105',gears:22,drivetrain:'机械变速',wheelset:'铝合金品牌轮组（禧玛诺/DT）',hub:'Shimano（禧玛诺）',rim_type:'内胎式',weight:8.2,frame:'标准碳纤维',brake:'机械碟刹'}},
+
+  {id:'b07',name:'美利达 Scultura 6000',cat:'公路车',price:11800,status:'active',note:'高模碳，Ultegra套件，爬坡利器',img:'',prices:{jd:11800,tb:11500,pdd:null,dy:null},updated:'2026-05',
+   params:{geo_type:'竞速型',stack:530,reach:385,head_tube:115,groupset:'Shimano Ultegra',gears:22,drivetrain:'机械变速',wheelset:'铝合金品牌轮组（禧玛诺/DT）',hub:'Shimano（禧玛诺）',rim_type:'内胎式',weight:7.8,frame:'高模碳纤维',brake:'机械碟刹'}},
+
+  {id:'b08',name:'崔克 Domane SL 6',cat:'公路车',price:16800,status:'active',note:'耐力碳架，105 Di2电变，长途首选',img:'',prices:{jd:16800,tb:16500,pdd:null,dy:null},updated:'2026-05',
+   params:{geo_type:'舒适耐力型',stack:552,reach:382,head_tube:145,groupset:'Shimano 105',gears:22,drivetrain:'电子变速（Di2/eTap）',wheelset:'铝合金品牌轮组（禧玛诺/DT）',hub:'Shimano（禧玛诺）',rim_type:'无内胎（Tubeless）',weight:8.1,frame:'标准碳纤维',brake:'油压碟刹'}},
+
+  {id:'b09',name:'专业 Tarmac SL7 Expert',cat:'公路车',price:26000,status:'active',note:'竞速碳，Ultegra Di2，均衡全能',img:'',prices:{jd:26000,tb:25500,pdd:null,dy:null},updated:'2026-05',
+   params:{geo_type:'竞速型',stack:540,reach:390,head_tube:125,groupset:'Shimano Ultegra',gears:22,drivetrain:'电子变速（Di2/eTap）',wheelset:'碳纤维品牌轮组',hub:'DT Swiss',rim_type:'无内胎（Tubeless）',weight:7.2,frame:'高模碳纤维',brake:'油压碟刹'}},
+
+  {id:'b10',name:'闪电 Roubaix SL8 Pro',cat:'公路车',price:34800,status:'active',note:'顶级耐力，Future Shock减震，Dura-Ace',img:'',prices:{jd:34800,tb:34500,pdd:null,dy:null},updated:'2026-05',
+   params:{geo_type:'舒适耐力型',stack:558,reach:383,head_tube:148,groupset:'Shimano Dura-Ace',gears:22,drivetrain:'电子变速（Di2/eTap）',wheelset:'碳纤维品牌轮组',hub:'DT Swiss',rim_type:'无内胎（Tubeless）',weight:7.0,frame:'高模碳纤维',brake:'油压碟刹'}},
+
+  {id:'c01',name:'德龙 Dedica EC685',cat:'意式浓缩机',price:999,status:'active',note:'入门意式，小巧便宜',img:'',prices:{jd:999,tb:899,pdd:849,dy:929},updated:'2026-05',
+   params:{pressure:15,boiler:'单锅炉（小）',pid:'无',grinder:'无',preinfusion:'无',steam:'Panarello棒'}},
+
+  {id:'c02',name:'Breville Barista Express',cat:'意式浓缩机',price:4200,status:'active',note:'内置磨豆机一体机',img:'',prices:{jd:4200,tb:3999,pdd:3899,dy:null},updated:'2026-05',
+   params:{pressure:15,boiler:'单锅炉（大）',pid:'有',grinder:'有（锥刀）',preinfusion:'手动',steam:'专业蒸汽棒'}},
+
+  {id:'s01',name:'蕉下 轻弹系列',cat:'防晒衣',price:299,status:'active',note:'轻薄弹力，日常户外首选',img:'',prices:{jd:299,tb:279,pdd:259,dy:269},updated:'2026-05',
+   params:{stretch:'四向弹力',weight_fabric:88,material:'尼龙+氨纶',upf:'UPF50+',mosquito:'无',mesh:'局部网眼',waterproof:'DWR防泼水'}},
+
+  {id:'s02',name:'牧高笛 防晒防蚊衣',cat:'防晒衣',price:199,status:'active',note:'户外专业，防蚊处理',img:'',prices:{jd:199,tb:189,pdd:179,dy:185},updated:'2026-05',
+   params:{stretch:'双向弹力',weight_fabric:95,material:'尼龙',upf:'UPF50+',mosquito:'物理防蚊（密织）',mesh:'局部网眼',waterproof:'DWR防泼水'}},
 ];
 
-// ── 云端存储（Cloudflare KV） ──────────────────────────────
-const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-let cloudSynced = false;
+// ════════════════════════════════════════════════════
+// 云端 + 本地存储
+// ════════════════════════════════════════════════════
+function setSync(state){
+  const dot=document.getElementById('sync-dot');
+  if(state==='ok')dot.className='sync-dot ok';
+  else if(state==='err')dot.className='sync-dot err';
+  else dot.className='sync-dot';
+}
 
-async function loadItemsCloud(){
-  try {
-    const r = await fetch('/api');
-    const json = await r.json();
-    if(json.ok && json.data && json.data.items && json.data.items.length > 0){
-      items = json.data.items;
-      if(json.data.weights) { W = json.data.weights; }
-      cloudSynced = true;
+async function loadCloud(){
+  try{
+    const r=await fetch('/api',{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const j=await r.json();
+    if(j.ok&&j.data&&j.data.items&&j.data.items.length>0){
+      items=j.data.items;
+      if(j.data.weights)W=j.data.weights;
+      localStorage.setItem('sdi6',JSON.stringify(items));
+      saveW(W);
+      setSync('ok');
       return true;
     }
-  } catch(e) { console.warn('Cloud load failed:', e); }
-  return false;
+    setSync('ok');// KV空但连接正常
+    return false;
+  }catch(e){
+    console.warn('Cloud load failed:',e);
+    setSync('err');
+    return false;
+  }
 }
 
 async function saveCloud(){
-  try {
-    await fetch('/api', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items, weights: W })
-    });
-    cloudSynced = true;
-  } catch(e) { console.warn('Cloud save failed:', e); }
+  try{
+    const r=await fetch('/api',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items,weights:W})});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    setSync('ok');
+  }catch(e){
+    console.warn('Cloud save failed:',e);
+    setSync('err');
+  }
 }
 
-// 保底 localStorage（离线备份）
 function loadItems(){
-  const r=localStorage.getItem('sdi5');
+  const r=localStorage.getItem('sdi6');
   if(r){const d=JSON.parse(r);if(d&&d.length>0)return d;}
-  localStorage.setItem('sdi5',JSON.stringify(SAMPLE));
+  localStorage.setItem('sdi6',JSON.stringify(SAMPLE));
   return JSON.parse(JSON.stringify(SAMPLE));
 }
 function saveItems(d){
-  localStorage.setItem('sdi5',JSON.stringify(d));
-  saveCloud(); // 同步云端
+  localStorage.setItem('sdi6',JSON.stringify(d));
+  saveCloud();
 }
+
 let items=loadItems();
 
-// ════════════════════════════════════════════════════════════
-// SCORING
-// ════════════════════════════════════════════════════════════
-function sch(cat){return SCHEMAS[cat]||SCHEMAS['防晒衣'];}
+// ════════════════════════════════════════════════════
+// 评分
+// ════════════════════════════════════════════════════
+function sch(cat){return SCHEMAS[cat]||SCHEMAS['公路车'];}
 function autoScore(item){return sch(item.cat).score(item.params||{},item.price);}
-function dimW(d){return W[DKM[d]||'perf']||5;}
+function dimW(d,cat){const key=sch(cat).wkeys[d]||'perf';return W[key]||5;}
 function finalScore(item){
   const sc=autoScore(item);
   const dims=Object.keys(sc);
   let ws=0,wsc=0;
-  dims.forEach(d=>{const w=dimW(d);ws+=w;wsc+=sc[d]*w;});
+  dims.forEach(d=>{const w=dimW(d,item.cat);ws+=w;wsc+=sc[d]*w;});
   const pf=Math.log10(item.price/1000+1)*1.5+1;
   return+(wsc/ws/pf*2.5).toFixed(2);
 }
@@ -910,72 +640,49 @@ function lowPrice(item){
   return v.length?Math.min(...v):null;
 }
 
-// ════════════════════════════════════════════════════════════
-// UI HELPERS
-// ════════════════════════════════════════════════════════════
-function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2200);}
-function stag(s){
-  if(s==='eol')return'<span class="tag tag-off">已停产</span>';
-  if(s==='eol-soon')return'<span class="tag tag-soon">即将停产</span>';
-  return'<span class="tag tag-on">在售</span>';
-}
+// ════════════════════════════════════════════════════
+// UI 工具
+// ════════════════════════════════════════════════════
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');setTimeout(()=>e.classList.remove('show'),2400);}
+function stag(s){if(s==='eol')return'<span class="tag tag-off">已停产</span>';if(s==='eol-soon')return'<span class="tag tag-soon">即将停产</span>';return'<span class="tag tag-on">在售</span>';}
 function getCats(){return[...new Set(items.map(i=>i.cat))];}
 function byCat(c){return items.filter(i=>i.cat===c);}
-function fillSel(id){
-  const s=document.getElementById(id);
-  if(!s)return;
-  const cats=getCats(),prev=s.value;
-  s.innerHTML=cats.map(c=>`<option>${c}</option>`).join('');
-  if(cats.includes(prev))s.value=prev;
-}
+function fillSel(id){const s=document.getElementById(id);if(!s)return;const cats=getCats(),prev=s.value;s.innerHTML=cats.map(c=>`<option>${c}</option>`).join('');if(cats.includes(prev))s.value=prev;}
 function fillAll(){['rec-cat','cmp-cat','upg-cat','prc-cat'].forEach(fillSel);}
-function updCount(){document.getElementById('item-count').textContent=items.length+' 件商品';}
-
-function imgTag(item){
-  if(item.img&&item.img.length>10){
-    return`<div class="prod-img"><img src="${item.img}" alt="${item.name}" onerror="this.parentElement.innerHTML='<div class=prod-img-placeholder>📦</div>'"></div>`;
-  }
-  const icons={'公路车':'🚴','意式浓缩机':'☕','全自动咖啡机':'☕','手冲/滴滤机':'☕','防晒衣':'🧥'};
-  return`<div class="prod-img"><div class="prod-img-placeholder">${icons[item.cat]||'📦'}</div></div>`;
-}
-
-function bars(item){
-  const s=sch(item.cat),scores=autoScore(item);
-  return s.dims.map(d=>{
-    const v=scores[d]??5,c=s.colors[d]||'#9896a0';
-    const desc=s.dimDesc&&s.dimDesc[d]?`title="${s.dimDesc[d]}"`:'';
-    const stars='★'.repeat(Math.round(v/2))+'☆'.repeat(5-Math.round(v/2));
-    return`<div class="srow" ${desc} style="cursor:default">
-      <span class="slbl" style="font-size:10px">${d}</span>
-      <div class="bbg"><div class="bfill" style="width:${v*10}%;background:${c}"></div></div>
-      <span class="snum">${v}</span>
-    </div>`;
-  }).join('');
-}
+function updCount(){document.getElementById('item-count').textContent=items.length+' 件';}
+const ICONS={'公路车':'🚴','意式浓缩机':'☕','全自动咖啡机':'☕','手冲/滴滤机':'☕','防晒衣':'🧥'};
 
 function chips(item){
   if(!item.prices||!Object.values(item.prices).some(v=>v&&v>0))return'';
   const lp=lowPrice(item);
-  return'<div class="pchips">'+Object.entries(PLAT).map(([k,l])=>{
-    const v=item.prices[k];if(!v||v<=0)return'';
-    return`<span class="pchip${v===lp?' low':''}">${l} ¥${v.toLocaleString()}${v===lp?' ★':''}</span>`;
-  }).join('')+'</div>';
+  return'<div class="pchips">'+Object.entries(PLAT).map(([k,l])=>{const v=item.prices[k];if(!v||v<=0)return'';return`<span class="pchip${v===lp?' low':''}">${l} ¥${v.toLocaleString()}${v===lp?' ★':''}</span>`;}).join('')+'</div>';
 }
 
-// ════════════════════════════════════════════════════════════
-// RECOMMEND
-// ════════════════════════════════════════════════════════════
+function bars(item){
+  const s=sch(item.cat),sc=autoScore(item);
+  return s.dims.map(d=>{
+    const v=sc[d]??5,c=s.colors[d]||'#9896a0';
+    const desc=s.dimDesc&&s.dimDesc[d]?`title="${s.dimDesc[d]}"`:'';
+    return`<div class="srow" ${desc}><span class="slbl">${d}</span><div class="bbg"><div class="bfill" style="width:${v*10}%;background:${c}"></div></div><span class="snum">${v}</span></div>`;
+  }).join('');
+}
+
+function imgEl(item,h=130){
+  if(item.img&&item.img.length>10)return`<div class="prod-img" style="height:${h}px"><img src="${item.img}" onerror="this.parentElement.innerHTML='<span>${ICONS[item.cat]||'📦'}</span>'"></div>`;
+  return`<div class="prod-img" style="height:${h}px">${ICONS[item.cat]||'📦'}</div>`;
+}
+
+// ════════════════════════════════════════════════════
+// 推荐
+// ════════════════════════════════════════════════════
 function renderRec(){
   fillSel('rec-cat');
   const cat=document.getElementById('rec-cat').value;
   const budget=+document.getElementById('rec-budget').value;
-  const pool=byCat(cat).filter(i=>i.price<=budget*1.2&&i.status!=='eol');
+  const pool=byCat(cat).filter(i=>i.price<=budget*1.15&&i.status!=='eol');
   const el=document.getElementById('rec-out');
-  if(!pool.length){
-    el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div>预算内暂无商品，请提高预算或在「管理商品」添加</div>';
-    return;
-  }
-  const scored=pool.map(i=>({...i,_f:finalScore(i)})).sort((a,b)=>b._f-a._f);
+  if(!pool.length){el.innerHTML='<div class="empty"><div class="empty-icon">🔍</div>预算内暂无商品</div>';return;}
+  const sc=pool.map(i=>({...i,_f:finalScore(i)})).sort((a,b)=>b._f-a._f);
   const s=sch(cat);
   const perfDim=s.dims[0];
   const bestPerf=[...pool].sort((a,b)=>(autoScore(b)[perfDim]||0)-(autoScore(a)[perfDim]||0))[0];
@@ -986,39 +693,37 @@ function renderRec(){
   })[0];
   const picks=[];const seen=new Set();
   const add=(item,tag,cls,reason)=>{if(!seen.has(item.id)){seen.add(item.id);picks.push({item,tag,cls,reason});}};
-  add(scored[0],'最适合你','tag-best',`综合你的偏好权重，评分 ${scored[0]._f}/10 全场最高，最符合你的需求。`);
+  add(sc[0],'最适合你','tag-best',`综合偏好权重评分 ${sc[0]._f}/10，当前预算最符合你需求的选择。`);
   add(bestVal,'性价比最高','tag-val','每元获得的综合评分最高，花最少的钱得到最多。');
-  add(bestPerf,perfDim+'最强','tag-perf',`${perfDim}评分 ${(autoScore(bestPerf)[perfDim]||0)}/10，该品类这项指标最强。`);
-
-  el.innerHTML=picks.map(({item,tag,cls,reason},idx)=>`
+  add(bestPerf,perfDim+'最强','tag-perf',`${perfDim}评分 ${(autoScore(bestPerf)[perfDim]||0)}/10，该指标最突出。`);
+  el.innerHTML=picks.map(({item,tag,cls,reason})=>`
     <div class="card ${tag==='最适合你'?'hl':''}">
       <div style="display:flex;gap:14px;flex-wrap:wrap">
-        <div style="flex:0 0 auto;width:120px">
-          ${imgTag(item)}
+        <div style="flex:0 0 auto;width:110px">
+          ${imgEl(item,110)}
           <div style="text-align:center;margin-top:6px">
-            <div class="big-score" style="color:${tag==='最适合你'?'var(--accent2)':tag==='性价比最高'?'var(--green)':'var(--amber)'}">${finalScore(item)}</div>
-            <div style="font-size:11px;color:var(--text3);margin-top:2px">综合评分</div>
+            <div style="font-size:30px;font-weight:800;color:${tag==='最适合你'?'var(--ac2)':tag==='性价比最高'?'var(--gn)':'var(--am)'}">${finalScore(item)}</div>
+            <div style="font-size:11px;color:var(--tx3)">综合评分</div>
           </div>
         </div>
-        <div style="flex:1;min-width:200px">
+        <div style="flex:1;min-width:180px">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px">
             <span style="font-size:15px;font-weight:700">${item.name}</span>
-            <span class="tag ${cls}">${tag}</span>
-            ${stag(item.status)}
+            <span class="tag ${cls}">${tag}</span>${stag(item.status)}
           </div>
           <div style="font-size:22px;font-weight:700;margin-bottom:4px">¥${item.price.toLocaleString()}</div>
           ${chips(item)}
-          ${item.updated?`<div style="font-size:11px;color:var(--text3);margin-top:6px">价格更新：${item.updated}</div>`:''}
-          <div style="margin-top:14px">${bars(item)}</div>
-          <div class="reason" style="margin-top:10px">${reason}${item.note?'<br><span style="color:var(--text3)">💬 '+item.note+'</span>':''}</div>
+          ${item.updated?`<div style="font-size:11px;color:var(--tx3);margin-top:5px">更新：${item.updated}</div>`:''}
+          <div style="margin-top:12px">${bars(item)}</div>
+          <div class="reason">${reason}${item.note?'<br><span style="color:var(--tx3)">💬 '+item.note+'</span>':''}</div>
         </div>
       </div>
     </div>`).join('');
 }
 
-// ════════════════════════════════════════════════════════════
-// COMPARE
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 对比（竖列）
+// ════════════════════════════════════════════════════
 function renderCmp(){
   fillSel('cmp-cat');
   const cat=document.getElementById('cmp-cat').value;
@@ -1029,34 +734,42 @@ function renderCmp(){
   const scored=pool.map(i=>({...i,_f:finalScore(i),_sc:autoScore(i)})).sort((a,b)=>b._f-a._f);
   const bpd={};s.dims.forEach(d=>{bpd[d]=Math.max(...scored.map(i=>i._sc[d]||0));});
   const bf=Math.max(...scored.map(i=>i._f));
-  el.innerHTML=`<div class="card" style="padding:14px">
-    <div class="cmp-wrap">
-      <table class="cmp-t">
-        <thead><tr>
-          <th>型号</th><th>图片</th><th>状态</th><th>参考价</th><th>综合分</th>
-          ${s.dims.map(d=>`<th style="color:${s.colors[d]||'#666'}">${d}</th>`).join('')}
-        </tr></thead>
-        <tbody>${scored.map(item=>`<tr class="${item._f===bf?'tr-top':''}">
-          <td style="font-weight:${item._f===bf?700:400};white-space:nowrap;max-width:150px">${item.name}</td>
-          <td>
-            ${item.img&&item.img.length>10
-              ?`<img src="${item.img}" style="width:40px;height:40px;object-fit:contain;border-radius:6px;background:var(--bg3)" onerror="this.style.display='none'">`
-              :`<div style="width:40px;height:40px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px">${{'公路车':'🚴','意式浓缩机':'☕','全自动咖啡机':'☕','手冲/滴滤机':'☕','防晒衣':'🧥'}[item.cat]||'📦'}</div>`}
-          </td>
-          <td>${stag(item.status)}</td>
-          <td style="font-weight:600;white-space:nowrap">¥${item.price.toLocaleString()}</td>
-          <td style="font-weight:700;color:${item._f===bf?'var(--accent2)':'var(--text)'};font-size:14px">${item._f}</td>
-          ${s.dims.map(d=>`<td class="${(item._sc[d]||0)===bpd[d]?'bv':''}">${item._sc[d]??5}${(item._sc[d]||0)===bpd[d]?' ★':''}</td>`).join('')}
-        </tr>`).join('')}</tbody>
-      </table>
-    </div>
-    <p class="hint" style="margin-top:10px">紫色行为综合推荐 · ★ 该维度最优 · 评分由参数自动计算</p>
-  </div>`;
+  el.innerHTML='<div class="cmp-cards">'+scored.map(item=>`
+    <div class="cmp-row ${item._f===bf?'top-row':''}">
+      <div class="cmp-cell-header">
+        ${item.img&&item.img.length>10?`<img src="${item.img}" onerror="this.style.display='none'">`:`<div class="icon-fallback">${ICONS[item.cat]||'📦'}</div>`}
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--tx)">${item.name}</div>
+          <div style="font-size:11px;color:var(--tx3);margin-top:2px">${stag(item.status)}</div>
+        </div>
+        ${item._f===bf?'<span class="tag tag-best">综合最优</span>':''}
+      </div>
+      <div class="cmp-dims">
+        ${s.dims.map(d=>{
+          const v=item._sc[d]??5,c=s.colors[d]||'#9896a0',isBest=(v===bpd[d]);
+          return`<div class="cmp-dim-row">
+            <span class="cmp-dim-lbl">${d}</span>
+            <div class="cmp-dim-bar"><div class="cmp-dim-fill" style="width:${v*10}%;background:${c}"></div></div>
+            <span class="cmp-dim-val ${isBest?'bv':''}">${v}${isBest?' ★':''}</span>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="cmp-meta">
+        <div>
+          <div class="cmp-price">¥${item.price.toLocaleString()}</div>
+          ${chips(item)}
+        </div>
+        <div style="text-align:right">
+          <div class="cmp-score">${item._f}</div>
+          <div style="font-size:11px;color:var(--tx3)">综合分</div>
+        </div>
+      </div>
+    </div>`).join('')+'</div>';
 }
 
-// ════════════════════════════════════════════════════════════
-// UPGRADE
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 升级分析
+// ════════════════════════════════════════════════════
 function fillUpgSelects(){
   fillSel('upg-cat');
   const pool=byCat(document.getElementById('upg-cat').value);
@@ -1066,6 +779,7 @@ function fillUpgSelects(){
   if(pool.length>1)document.getElementById('upg-to').selectedIndex=1;
   renderUpg();
 }
+
 function renderUpg(){
   const pool=byCat(document.getElementById('upg-cat').value);
   const fi=+document.getElementById('upg-from').value,ti=+document.getElementById('upg-to').value;
@@ -1076,163 +790,128 @@ function renderUpg(){
   const pd=to.price-fr.price,sd=+(ts-fs).toFixed(2);
   const p1k=pd!==0?+(sd/Math.abs(pd)*1000).toFixed(3):null;
   const isUp=pd>0;
-
-  // 三档判定
   let level,verdClass,verdIcon,txt,reasonTxt;
   if(!isUp){
-    // 降价情况
-    if(sd>=0){
-      level='strong';verdClass='verd-y';verdIcon='✅';
-      txt='少花钱综合分不降反升，强烈推荐。';
-    } else if(sd>=-0.3){
-      level='ok';verdClass='verd-ok';verdIcon='🟡';
-      txt=`少花 ¥${Math.abs(pd).toLocaleString()}，综合分小降 ${Math.abs(sd)} 分，如预算有限可以接受。`;
-    } else {
-      level='no';verdClass='verd-n';verdIcon='❌';
-      txt=`虽然价格更低，但综合分明显下降 ${Math.abs(sd)} 分，不建议降级。`;
-    }
-    reasonTxt='降价方案：综合分变化决定是否值得。';
-  } else if(sd<=0){
+    if(sd>=0){level='strong';verdClass='verd-y';verdIcon='✅';txt=`少花 ¥${Math.abs(pd).toLocaleString()} 综合分不降反升，强烈推荐。`;reasonTxt='降价且提升，明确推荐。';}
+    else if(sd>=-0.3){level='ok';verdClass='verd-ok';verdIcon='🟡';txt=`少花 ¥${Math.abs(pd).toLocaleString()}，综合分小降 ${Math.abs(sd)} 分，预算有限可接受。`;reasonTxt='少花钱，略有牺牲。';}
+    else{level='no';verdClass='verd-n';verdIcon='❌';txt=`虽然价格更低，但综合分下降 ${Math.abs(sd)} 分，不建议。`;reasonTxt='降级明显，不推荐。';}
+  }else if(sd<=0){
     level='no';verdClass='verd-n';verdIcon='❌';
     txt=`多花 ¥${pd.toLocaleString()} 但综合评分${sd<0?'反而降低 '+Math.abs(sd)+' 分':'持平'}，不划算。`;
-    reasonTxt='花更多钱却没有提升，明确不推荐。';
-  } else {
-    // 升价且有提升——三档判定
-    if(sd>=0.6 && p1k>=0.3){
-      level='strong';verdClass='verd-y';verdIcon='✅';
-      txt=`分差 ${sd}（≥0.6）且每千元提升 ${p1k} 分（≥0.3），提升幅度明显，强烈推荐升级。`;
-      reasonTxt='同时满足分差和效率双指标，升级体验提升显著。';
-    } else if(sd>=0.4 && p1k>=0.25){
-      level='ok';verdClass='verd-ok';verdIcon='🟡';
-      txt=`分差 ${sd}（≥0.4）且每千元提升 ${p1k} 分（≥0.25），有一定提升，如预算允许可以升级。`;
-      reasonTxt='满足基础升级标准，但提升幅度一般，取决于你的预算余裕。';
-    } else {
+    reasonTxt='花更多钱没有提升，明确不推荐。';
+  }else{
+    if(sd>=0.6&&p1k>=0.3){level='strong';verdClass='verd-y';verdIcon='✅';txt=`分差 ${sd}（≥0.6）且每千元提升 ${p1k} 分（≥0.3），提升显著，强烈推荐。`;reasonTxt='双指标均达标，升级体验明显。';}
+    else if(sd>=0.4&&p1k>=0.25){level='ok';verdClass='verd-ok';verdIcon='🟡';txt=`分差 ${sd}（≥0.4）且每千元提升 ${p1k} 分（≥0.25），有提升，预算允许可升级。`;reasonTxt='满足基础标准，取决于预算。';}
+    else{
       level='no';verdClass='verd-n';verdIcon='❌';
-      const reason1=sd<0.4?`分差仅 ${sd}（需≥0.4）`:'';
-      const reason2=p1k<0.25?`每千元仅提升 ${p1k} 分（需≥0.25）`:'';
-      const reasons=[reason1,reason2].filter(Boolean).join('、');
-      txt=`${reasons}，提升感不明显，不推荐升级。`;
-      reasonTxt='未达到推荐升级的最低标准，建议等待更大幅度的差距。';
+      const r1=sd<0.4?`分差仅 ${sd}（需≥0.4）`:'';
+      const r2=p1k<0.25?`每千元仅 ${p1k} 分（需≥0.25）`:'';
+      txt=[r1,r2].filter(Boolean).join('、')+'，提升感不明显。';
+      reasonTxt='未达最低升级标准。';
     }
   }
-
   el.innerHTML=`<div class="card">
     <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);padding:12px">
-        <div style="font-size:11px;color:var(--text3);margin-bottom:4px">现有</div>
+      <div style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--rs);padding:12px">
+        <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">现有</div>
         <div style="font-size:13px;font-weight:600">${fr.name}</div>
         <div style="font-size:20px;font-weight:700;margin-top:4px">¥${fr.price.toLocaleString()}</div>
-        <div style="font-size:13px;color:var(--text2);margin-top:6px">综合分 <b style="color:var(--text);font-size:16px">${fs}</b></div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:5px">综合分 <b style="color:var(--tx);font-size:16px">${fs}</b></div>
       </div>
-      <div style="display:flex;align-items:center;font-size:24px;color:var(--text3)">→</div>
-      <div style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--accent);border-radius:var(--rs);padding:12px">
-        <div style="font-size:11px;color:var(--accent2);margin-bottom:4px">目标</div>
+      <div style="display:flex;align-items:center;font-size:22px;color:var(--tx3)">→</div>
+      <div style="flex:1;min-width:130px;background:var(--bg3);border:1px solid var(--ac);border-radius:var(--rs);padding:12px">
+        <div style="font-size:11px;color:var(--ac2);margin-bottom:4px">目标</div>
         <div style="font-size:13px;font-weight:600">${to.name}</div>
         <div style="font-size:20px;font-weight:700;margin-top:4px">¥${to.price.toLocaleString()}</div>
-        <div style="font-size:13px;color:var(--text2);margin-top:6px">综合分 <b style="color:var(--accent2);font-size:16px">${ts}</b></div>
+        <div style="font-size:13px;color:var(--tx2);margin-top:5px">综合分 <b style="color:var(--ac2);font-size:16px">${ts}</b></div>
       </div>
     </div>
     <div class="mets">
-      <div class="met">
-        <div class="met-v" style="color:${pd>0?'var(--red)':'var(--green)'}">${pd>0?'+':''}¥${Math.abs(pd).toLocaleString()}</div>
-        <div class="met-l">价格差</div>
-      </div>
-      <div class="met">
-        <div class="met-v" style="color:${sd>=0?'var(--green)':'var(--red)'}">${sd>=0?'+':''}${sd}</div>
-        <div class="met-l">综合分差</div>
-      </div>
-      <div class="met">
-        <div class="met-v" style="font-size:16px;color:${p1k&&p1k>=0.3?'var(--green)':p1k&&p1k>=0.25?'var(--amber)':'var(--red)'}">${p1k!==null?(p1k>0?'+':'')+p1k:'—'}</div>
-        <div class="met-l">分/千元</div>
-      </div>
+      <div class="met"><div class="met-v" style="color:${pd>0?'var(--rd)':'var(--gn)'}">${pd>0?'+':''}¥${Math.abs(pd).toLocaleString()}</div><div class="met-l">价格差</div></div>
+      <div class="met"><div class="met-v" style="color:${sd>=0?'var(--gn)':'var(--rd)'}">${sd>=0?'+':''}${sd}</div><div class="met-l">综合分差</div></div>
+      <div class="met"><div class="met-v" style="font-size:16px;color:${p1k&&p1k>=0.3?'var(--gn)':p1k&&p1k>=0.25?'var(--am)':'var(--rd)'}">${p1k!==null?(p1k>0?'+':'')+p1k:'—'}</div><div class="met-l">分/千元</div></div>
     </div>
     <div class="verd ${verdClass}">
       <div class="verd-t">${verdIcon} ${level==='strong'?'强烈推荐升级':level==='ok'?'可以升级':'不推荐升级'}</div>
       <div class="verd-b">${txt}</div>
     </div>
-    <div class="reason">${reasonTxt}<br><span style="color:var(--text3)">判定标准：✅ 分差≥0.6且分/千元≥0.3 · 🟡 分差≥0.4且分/千元≥0.25 · ❌ 其他</span></div>
+    <div class="reason">${reasonTxt}<br><span style="color:var(--tx3)">✅ 分差≥0.6且分/千元≥0.3 · 🟡 分差≥0.4且分/千元≥0.25 · ❌ 其他</span></div>
   </div>`;
 }
 
-// ════════════════════════════════════════════════════════════
-// PRICES
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 比价
+// ════════════════════════════════════════════════════
 function renderPrc(){
   fillSel('prc-cat');
   const cat=document.getElementById('prc-cat').value;
-  const pool=byCat(cat);
   const el=document.getElementById('prc-out');
-  if(!pool.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏷️</div>该品类暂无商品</div>';return;}
+  const pool=byCat(cat);
+  if(!pool.length){el.innerHTML='<div class="empty"><div class="empty-icon">🏷️</div>暂无商品</div>';return;}
   el.innerHTML=pool.map(item=>{
     const lp=lowPrice(item);
     const has=item.prices&&Object.values(item.prices).some(v=>v&&v>0);
     return`<div class="card card-sm">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:${has?'12':'0'}px">
         <div style="display:flex;align-items:center;gap:10px">
-          ${item.img&&item.img.length>10?`<img src="${item.img}" style="width:40px;height:40px;object-fit:contain;border-radius:8px;background:var(--bg3)" onerror="this.style.display='none'">`:''}
-          <div>
-            <span style="font-size:14px;font-weight:600">${item.name}</span>
-            ${stag(item.status)}
-          </div>
+          ${item.img&&item.img.length>10?`<img src="${item.img}" style="width:36px;height:36px;object-fit:contain;border-radius:7px;background:var(--bg3)">`:`<div style="width:36px;height:36px;background:var(--bg3);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px">${ICONS[item.cat]||'📦'}</div>`}
+          <div><span style="font-size:14px;font-weight:600">${item.name}</span> ${stag(item.status)}</div>
         </div>
-        ${lp?`<div style="text-align:right"><div style="font-size:11px;color:var(--text3)">最低价</div><div style="font-size:20px;font-weight:700;color:var(--green)">¥${lp.toLocaleString()}</div></div>`:''}
+        ${lp?`<div style="text-align:right"><div style="font-size:11px;color:var(--tx3)">最低价</div><div style="font-size:20px;font-weight:700;color:var(--gn)">¥${lp.toLocaleString()}</div></div>`:''}
       </div>
-      ${has?`<div class="price-grid">
-        ${Object.entries(PLAT).map(([k,l])=>{
-          const v=item.prices[k];
-          if(!v||v<=0)return`<div class="price-cell"><div class="price-cell-platform">${l}</div><div class="price-cell-val" style="color:var(--text3)">—</div></div>`;
-          const low=v===lp;
-          return`<div class="price-cell ${low?'low-price':''}"><div class="price-cell-platform">${l}${low?' ★':''}</div><div class="price-cell-val">¥${v.toLocaleString()}</div></div>`;
-        }).join('')}
-      </div>`:'<p class="hint">未录入各平台价格，在「管理商品」中编辑添加。</p>'}
-      ${item.updated?`<p class="hint" style="margin-top:10px">价格更新：${item.updated}</p>`:''}
+      ${has?`<div class="price-grid">${Object.entries(PLAT).map(([k,l])=>{const v=item.prices[k];if(!v||v<=0)return`<div class="price-cell"><div class="pcell-plat">${l}</div><div class="pcell-val" style="color:var(--tx3)">—</div></div>`;return`<div class="price-cell${v===lp?' low':''}"><div class="pcell-plat">${l}${v===lp?' ★':''}</div><div class="pcell-val">¥${v.toLocaleString()}</div></div>`;}).join('')}</div>`:`<p class="hint">未录入平台价格</p>`}
+      ${item.updated?`<p class="hint" style="margin-top:8px">更新：${item.updated}</p>`:''}
     </div>`;
   }).join('');
 }
 
-// ════════════════════════════════════════════════════════════
-// PREFS
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 偏好（全品类通用）
+// ════════════════════════════════════════════════════
 function renderPrefs(){
-  document.getElementById('presets-wrap').innerHTML=PRESETS.map((p,i)=>
+  document.getElementById('presets-wrap').innerHTML=PRESETS_DATA.map((p,i)=>
     `<button class="preset" onclick="applyPreset(${i},this)">${p.label}</button>`).join('');
-  document.getElementById('prf-sliders').innerHTML=Object.entries(W_LABELS).map(([k,l])=>`
-    <div class="pref-row">
-      <div class="ph"><span style="font-size:13px">${l}</span><span class="ph-val" id="wv-${k}">${W[k]}</span></div>
-      <input type="range" min="1" max="10" step="1" value="${W[k]}"
-        oninput="W['${k}']=+this.value;document.getElementById('wv-${k}').textContent=this.value">
-    </div>`).join('');
+  let html='';
+  Object.entries(PREF_GROUPS).forEach(([grp,items])=>{
+    html+=`<div class="pref-group"><div class="pref-group-title">${grp}</div>`;
+    items.forEach(({key,label,desc})=>{
+      html+=`<div class="pref-row">
+        <div class="ph">
+          <div><div style="font-size:13px">${label}</div><div style="font-size:11px;color:var(--tx3)">${desc}</div></div>
+          <span class="ph-val" id="wv-${key}">${W[key]}</span>
+        </div>
+        <input type="range" min="1" max="10" step="1" value="${W[key]}"
+          oninput="W['${key}']=+this.value;document.getElementById('wv-${key}').textContent=this.value">
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('prf-sliders').innerHTML=html;
 }
 function applyPreset(i,btn){
   document.querySelectorAll('.preset').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  W={...PRESETS[i].w};saveW(W);renderPrefs();btn.classList.add('active');
-  toast('已应用「'+PRESETS[i].label+'」✓');
+  btn.classList.add('active');W={...PRESETS_DATA[i].w};saveW(W);renderPrefs();btn.classList.add('active');
+  toast('已应用「'+PRESETS_DATA[i].label+'」✓');
 }
 function savePrefs(){saveW(W);saveCloud();toast('偏好已保存 ✓');}
 function resetPrefs(){W={...DEF_W};saveW(W);renderPrefs();toast('已恢复默认');}
 
-// ════════════════════════════════════════════════════════════
-// ADMIN
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 管理
+// ════════════════════════════════════════════════════
 function renderAdm(){
   const cats=getCats(),el=document.getElementById('adm-out');
-  if(!items.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div>暂无商品，点击「添加商品」开始</div>';return;}
-  const icons={'公路车':'🚴','意式浓缩机':'☕','全自动咖啡机':'☕','手冲/滴滤机':'☕','防晒衣':'🧥'};
+  if(!items.length){el.innerHTML='<div class="empty"><div class="empty-icon">📦</div>暂无商品</div>';return;}
   el.innerHTML=cats.map(cat=>`
-    <div class="card" style="margin-bottom:14px">
-      <p class="stitle">${cat} <span style="font-weight:400;color:var(--text3);font-size:12px">${byCat(cat).length} 件</span></p>
+    <div class="card" style="margin-bottom:12px">
+      <p class="stitle">${cat} <span style="font-weight:400;color:var(--tx3);font-size:12px">${byCat(cat).length}件</span></p>
       ${byCat(cat).map(item=>`
         <div class="irow">
           <div class="irow-left">
-            <div class="irow-thumb">
-              ${item.img&&item.img.length>10
-                ?`<img src="${item.img}" onerror="this.parentElement.textContent='${icons[item.cat]||'📦'}'"/>`
-                :icons[item.cat]||'📦'}
-            </div>
+            <div class="irow-thumb">${item.img&&item.img.length>10?`<img src="${item.img}" onerror="this.textContent='${ICONS[item.cat]||'📦'}'">`:ICONS[item.cat]||'📦'}</div>
             <div>
               <div class="iname">${item.name} ${stag(item.status)}</div>
-              <div class="imeta">¥${item.price.toLocaleString()} · 综合分 ${finalScore(item)} · ${item.updated||'未更新'}</div>
+              <div class="imeta">¥${item.price.toLocaleString()} · 综合分 ${finalScore(item)} · ${item.updated||'—'}</div>
             </div>
           </div>
           <div class="iacts">
@@ -1243,359 +922,130 @@ function renderAdm(){
     </div>`).join('');
 }
 
-// ════════════════════════════════════════════════════════════
-// IMAGE HANDLING
-// ════════════════════════════════════════════════════════════
-function handleImgUpload(input){
+// ════════════════════════════════════════════════════
+// 图片
+// ════════════════════════════════════════════════════
+function handleImg(input){
   const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=e=>{
-    const data=e.target.result;
-    document.getElementById('f-img-data').value=data;
-    document.getElementById('f-img-url').value='';
-    showImgPreview(data);
+    document.getElementById('f-img-data').value=e.target.result;
+    const p=document.getElementById('img-preview');
+    p.src=e.target.result;p.style.display='block';
+    document.getElementById('img-hint').style.display='none';
+    document.getElementById('img-area').classList.add('has-img');
   };
   reader.readAsDataURL(file);
 }
-function handleImgUrl(input){
-  const url=input.value.trim();
-  if(url){
-    document.getElementById('f-img-data').value=url;
-    showImgPreview(url);
-  }
-}
-function showImgPreview(src){
-  const preview=document.getElementById('img-preview');
-  const hint=document.getElementById('img-upload-hint');
-  const area=document.getElementById('img-upload-area');
-  preview.src=src;
-  preview.style.display='block';
-  hint.style.display='none';
-  area.classList.add('has-img');
-}
-function clearImgPreview(){
+function clearImg(){
   document.getElementById('f-img-data').value='';
-  document.getElementById('f-img-url').value='';
   document.getElementById('f-img-file').value='';
-  const preview=document.getElementById('img-preview');
-  preview.style.display='none';
-  preview.src='';
-  document.getElementById('img-upload-hint').style.display='block';
-  document.getElementById('img-upload-area').classList.remove('has-img');
+  const p=document.getElementById('img-preview');
+  p.style.display='none';p.src='';
+  document.getElementById('img-hint').style.display='block';
+  document.getElementById('img-area').classList.remove('has-img');
 }
 
-// ════════════════════════════════════════════════════════════
-// MODAL
-// ════════════════════════════════════════════════════════════
-let editId=null;
+// ════════════════════════════════════════════════════
+// 粘贴参数自动填写
+// ════════════════════════════════════════════════════
+function parseAndFill(){
+  const raw=document.getElementById('paste-params').value;
+  if(!raw.trim()){toast('请先粘贴参数文字');return;}
+  const cat=document.getElementById('f-cat').value;
+  const s=sch(cat);let filled=0;
+  s.params.forEach(p=>{
+    const el=document.getElementById('fp-'+p.key);if(!el)return;
+    const val=matchParam(raw,p.key,p.type,p.opts);
+    if(val!==null){
+      el.value=val;
+      el.style.background='color-mix(in srgb,var(--ac-bg) 80%,var(--bg3))';
+      setTimeout(()=>el.style.background='',2000);
+      filled++;
+    }
+  });
+  updatePreview();
+  toast(filled>0?`✓ 自动填入 ${filled} 个参数，请检查`:'未识别到参数，请手动填写');
+}
 
+function matchParam(text,key,type,opts){
+  if(type!=='sel'){
+    const patterns={
+      weight:[/整车重量[：:]\s*(\d+\.?\d*)\s*kg/i,/重量[：:]\s*(\d+\.?\d*)\s*kg/i],
+      stack:[/stack[：:]\s*(\d+)/i,/叠高[：:]\s*(\d+)/i],
+      reach:[/reach[：:]\s*(\d+)/i,/前伸量[：:]\s*(\d+)/i],
+      head_tube:[/头管[长度]*[：:]\s*(\d+)/i,/head\s*tube[：:]\s*(\d+)/i],
+      gears:[/(\d+)\s*速/,/速别[：:]\s*(\d+)/i],
+      pressure:[/(\d+)\s*bar/i,/压力[：:]\s*(\d+)/i],
+      drinks:[/(\d+)\s*[种款]/],
+      capacity:[/容量[：:]\s*(\d+)\s*ml/i,/(\d+)\s*ml/i],
+      weight_fabric:[/克重[：:]\s*(\d+)/i,/(\d+)\s*g\s*\/?\s*㎡/i,/(\d+)gsm/i],
+    };
+    for(const pat of(patterns[key]||[])){const m=text.match(pat);if(m)return parseFloat(m[1]);}
+    return null;
+  }
+  if(!opts)return null;
+  const kp={
+    groupset:{
+      'Shimano Dura-Ace':/dura.?ace/i,'Shimano Ultegra':/ultegra/i,
+      'Shimano 105':/shimano\s*105|\b105\b/i,'Shimano Tiagra':/tiagra/i,
+      'Shimano Sora':/\bsora\b/i,'Shimano Claris':/claris/i,'Shimano Tourney':/tourney/i,
+      'SRAM Red':/sram\s*red/i,'SRAM Force':/sram\s*force/i,'SRAM Rival':/sram\s*rival/i,
+      'SRAM Apex':/sram\s*apex/i,'蓝图 A070':/蓝图.*a070|a070/i,'蓝图 A050':/蓝图.*a050|a050/i,
+    },
+    frame:{'高模碳纤维':/高模.*碳|t800|t900/i,'标准碳纤维':/碳纤维|carbon/i,'铝合金（高端）':/6061|7005|高端.*铝/i,'铝合金（标准）':/铝合金|alloy/i,'铬钼钢':/铬钼|cr.?mo/i,'钢':/\b钢\b|steel/i},
+    brake:{'油压碟刹':/油压碟|hydraulic\s*disc|油碟/i,'线拉油碟':/线拉油碟|cable.*hydraulic|螺旋油碟/i,'机械碟刹':/机械碟|mechanical\s*disc/i,'圈刹（双轴）':/圈刹|rim\s*brake/i},
+    geo_type:{'舒适耐力型':/耐力|endurance|舒适/i,'均衡型':/均衡|all.?round/i,'竞速型':/竞速|race/i},
+    pid:{'有':/pid|有.*控温/i,'无':/无.*pid|无.*控温/i},
+    boiler:{'双锅炉':/双锅炉|dual\s*boiler/i,'热交换锅炉':/热交换|HX/i,'单锅炉（大）':/thermoblock/i,'单锅炉（小）':/单锅炉/i},
+    stretch:{'四向弹力':/四向弹|4.?way/i,'双向弹力':/双向弹|2.?way/i},
+    upf:{'UPF50+':/upf\s*50/i,'UPF40+':/upf\s*40/i,'UPF30+':/upf\s*30/i},
+    material:{'尼龙+氨纶':/尼龙.*氨纶|nylon.*spandex/i,'涤纶+氨纶':/涤纶.*氨纶|polyester.*spandex/i,'尼龙':/尼龙|nylon|锦纶/i,'涤纶':/涤纶|polyester/i,'棉':/\b棉\b|cotton/i},
+  };
+  const kpk=kp[key];
+  if(kpk){for(const[o,p]of Object.entries(kpk)){if(opts.includes(o)&&p.test(text))return o;}}
+  for(const opt of opts){if(text.includes(opt)||text.includes(opt.replace(/[（）()]/g,'')))return opt;}
+  return null;
+}
+
+// ════════════════════════════════════════════════════
+// Modal
+// ════════════════════════════════════════════════════
+let editId=null;
 function buildParamFields(){
   const cat=document.getElementById('f-cat').value;
   const s=sch(cat);
   document.getElementById('param-fields').innerHTML=s.params.map(p=>`
-    <div style="margin-bottom:12px">
+    <div style="margin-bottom:11px">
       <label>${p.label}</label>
       ${p.type==='sel'
-        ?`<select id="fp-${p.key}" onchange="updatePreview()"><option value="">— 不知道，用默认值 —</option>${p.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
+        ?`<select id="fp-${p.key}" onchange="updatePreview()"><option value="">— 不知道，留空 —</option>${p.opts.map(o=>`<option>${o}</option>`).join('')}</select>`
         :`<input type="number" id="fp-${p.key}" placeholder="${p.ph||''}" min="0" oninput="updatePreview()">`}
       ${p.hint?`<p class="hint">${p.hint}</p>`:''}
     </div>`).join('');
   updatePreview();
 }
-
 function updatePreview(){
   const cat=document.getElementById('f-cat').value;
   const price=+document.getElementById('f-price').value||1000;
-  const s=sch(cat);
-  const params={};
-  s.params.forEach(p=>{
-    const el=document.getElementById('fp-'+p.key);
-    if(!el)return;
-    const v=p.type==='sel'?el.value:(+el.value||0);
-    if(v&&v!=='')params[p.key]=v;
-  });
+  const s=sch(cat);const params={};
+  s.params.forEach(p=>{const el=document.getElementById('fp-'+p.key);if(!el)return;const v=p.type==='sel'?el.value:(+el.value||0);if(v&&v!=='')params[p.key]=v;});
   const scores=s.score(params,price);
   const pv=document.getElementById('score-preview');
   pv.style.display='block';
-  pv.innerHTML='<b>自动计算评分预览：</b><br>'+Object.entries(scores).map(([k,v])=>`${k} <b style="font-size:14px">${v}</b>`).join('　·　');
+  pv.innerHTML='<b>自动评分预览：</b><br>'+Object.entries(scores).map(([k,v])=>`${k} <b style="font-size:13px">${v}</b>`).join('　');
 }
-
-
-// ════════════════════════════════════════════════════════════
-// URL DETECT
-// ════════════════════════════════════════════════════════════
-const URL_PLATFORMS = [
-  { name:'京东', pattern:/jd\.com|item\.jd/i, key:'jd' },
-  { name:'淘宝', pattern:/taobao\.com|item\.taobao/i, key:'tb' },
-  { name:'天猫', pattern:/tmall\.com/i, key:'tb' },
-  { name:'拼多多', pattern:/pinduoduo\.com|yangkeduo\.com/i, key:'pdd' },
-  { name:'抖音商城', pattern:/douyin\.com|haohuo\.jinritemai/i, key:'dy' },
-  { name:'迪卡侬官网', pattern:/decathlon/i, key:null },
-  { name:'品牌官网', pattern:/\.com|\.cn/i, key:null },
-];
-
-const URL_CAT_HINTS = [
-  { pattern:/bike|bicycle|cycling|自行车|公路车|山地车|单车|road.*bike/i, cat:'公路车', tips:['重量（整车kg）','套件品牌（Shimano/SRAM）','车架材质','变速级数'] },
-  { pattern:/espresso|浓缩|半自动.*咖啡|咖啡机.*bar|意式/i, cat:'意式浓缩机', tips:['锅炉类型','压力（bar）','是否有PID','蒸汽棒类型'] },
-  { pattern:/全自动.*咖啡|咖啡机|coffee.*machine|bean.*to.*cup/i, cat:'全自动咖啡机', tips:['磨豆机类型','饮品种类数','奶泡系统'] },
-  { pattern:/手冲|pour.*over|drip|滴滤|摩卡|法压/i, cat:'手冲/滴滤机', tips:['类型','温控方式','容量'] },
-  { pattern:/防晒|sun.*protect|upf|防紫外|outdoor.*shirt|户外.*上衣/i, cat:'防晒衣', tips:['UPF指数','面料克重','弹性类型','防蚊处理'] },
-];
-
-function detectUrl(url) {
-  const box = document.getElementById('url-detect-result');
-  if (!url || url.length < 10) { box.style.display='none'; return; }
-
-  let platform = null;
-  for (const p of URL_PLATFORMS) {
-    if (p.pattern.test(url)) { platform = p; break; }
-  }
-
-  let catMatch = null;
-  for (const c of URL_CAT_HINTS) {
-    if (c.pattern.test(url)) { catMatch = c; break; }
-  }
-
-  // Try to extract product name from URL
-  let urlName = '';
-  try {
-    const decoded = decodeURIComponent(url);
-    const segments = decoded.split(/[/?&=_-]/).filter(s => /[一-龥]/.test(s) && s.length > 2);
-    if (segments.length) urlName = segments.slice(0, 3).join(' ');
-  } catch(e) {}
-
-  let html = '';
-
-  if (platform) {
-    html += `<b>平台识别：</b>${platform.name}`;
-    if (platform.key) {
-      const priceEl = document.getElementById('fp-' + platform.key);
-      html += ` — 别忘了在下方「${platform.name}」价格栏填入该平台的价格`;
-    }
-    html += '<br>';
-  }
-
-  if (catMatch) {
-    html += `<b>品类建议：</b>${catMatch.cat}<br>`;
-    html += `<b>重点填写参数：</b>${catMatch.tips.join('、')}<br>`;
-    // Auto-set category
-    const catEl = document.getElementById('f-cat');
-    if (catEl && [...catEl.options].some(o => o.value === catMatch.cat)) {
-      catEl.value = catMatch.cat;
-      buildParamFields();
-    }
-  }
-
-  if (urlName && !document.getElementById('f-name').value) {
-    document.getElementById('f-name').value = urlName;
-  }
-
-  if (!platform && !catMatch) {
-    html = '链接已记录。请手动选择品类并填写参数。';
-  }
-
-  html += `<span style="color:var(--text3)">💡 系统无法自动抓取页面数据，请对照商品页面手动填写下方参数</span>`;
-
-  box.innerHTML = html;
-  box.style.display = 'block';
-
-  // Store URL for platform price hint
-  window._detectedUrl = url;
-  window._detectedPlatform = platform;
-}
-
-function copyUrlForClaude() {
-  const url = document.getElementById('f-url').value.trim();
-  const cat = document.getElementById('f-cat').value;
-  if (!url) { toast('请先粘贴商品链接'); return; }
-
-  const msg = `我要给购物决策助手录入一个商品，品类是「${cat}」，链接是：${url}
-
-请帮我查找这个商品的以下参数并生成可导入的JSON数据：` + getParamListForCat(cat);
-
-  navigator.clipboard.writeText(msg).then(() => {
-    toast('✓ 已复制，粘贴给 Claude 即可');
-  }).catch(() => {
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = msg;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    toast('✓ 已复制，粘贴给 Claude 即可');
-  });
-}
-
-function getParamListForCat(cat) {
-  const s = sch(cat);
-  if (!s) return '';
-  return '\n' + s.params.map(p => `- ${p.label}`).join('\n') + '\n- 各平台价格（京东/淘宝/拼多多/抖音）\n- 商品图片链接';
-}
-
-
-// ════════════════════════════════════════════════════════════
-// PASTE PARAMS AUTO-FILL
-// ════════════════════════════════════════════════════════════
-function parseAndFillParams(){
-  const raw = document.getElementById('paste-params').value;
-  if(!raw.trim()){ toast('请先粘贴参数文字'); return; }
-  const cat = document.getElementById('f-cat').value;
-  const s = sch(cat);
-  let filled = 0;
-
-  // 规则：针对每个参数字段尝试匹配
-  s.params.forEach(p => {
-    const el = document.getElementById('fp-' + p.key);
-    if(!el) return;
-    const val = matchParam(raw, p.key, p.label, p.type, p.opts);
-    if(val !== null){
-      el.value = val;
-      el.style.background = 'color-mix(in srgb, var(--accent-bg) 60%, var(--bg3))';
-      setTimeout(()=>el.style.background='', 2000);
-      filled++;
-    }
-  });
-
-  updatePreview();
-  toast(filled > 0 ? `✓ 自动填入 ${filled} 个参数，请检查并修改` : '未识别到匹配参数，请手动填写');
-}
-
-function matchParam(text, key, label, type, opts){
-  const t = text.toLowerCase();
-
-  // 数字型参数
-  if(type !== 'sel'){
-    const patterns = {
-      'weight': [/整车重量[：:]\s*(\d+\.?\d*)\s*kg/i, /重量[：:]\s*(\d+\.?\d*)\s*kg/i, /weight[：:]\s*(\d+\.?\d*)/i],
-      'stack': [/stack[：:]\s*(\d+)/i, /叠高[：:]\s*(\d+)/i],
-      'reach': [/reach[：:]\s*(\d+)/i, /前伸量[：:]\s*(\d+)/i],
-      'head_tube': [/头管[长度]*[：:]\s*(\d+)/i, /head\s*tube[：:]\s*(\d+)/i],
-      'top_tube': [/上管[有效长度]*[：:]\s*(\d+)/i, /top\s*tube[：:]\s*(\d+)/i, /有效上管[：:]\s*(\d+)/i],
-      'gears': [/(\d+)\s*速/, /速别[：:]\s*(\d+)/i, /变速[：:]\s*(\d+)\s*速/i],
-      'pressure': [/(\d+)\s*bar/i, /压力[：:]\s*(\d+)/i],
-      'drinks': [/(\d+)\s*[种款个]/],
-      'capacity': [/容量[：:]\s*(\d+)\s*ml/i, /(\d+)\s*ml/i],
-      'weight_fabric': [/克重[：:]\s*(\d+)/i, /面料.*?(\d+)\s*g/i, /(\d+)\s*g\s*\/?\s*㎡/i, /(\d+)gsm/i],
-    };
-    const pats = patterns[key] || [];
-    for(const pat of pats){
-      const m = text.match(pat);
-      if(m) return parseFloat(m[1]);
-    }
-    return null;
-  }
-
-  // 选择型参数
-  if(!opts) return null;
-  const keyPatterns = {
-    'groupset': {
-      'Dura-Ace（顶级）': /dura.?ace|da/i,
-      'Ultegra（次旗舰）': /ultegra/i,
-      '105（主流推荐）': /shimano\s*105|105/i,
-      'Tiagra（入门+）': /tiagra/i,
-      'Sora（入门）': /sora/i,
-      'Claris（基础）': /claris/i,
-      'Tourney（最基础）': /tourney/i,
-      'SRAM Red': /sram\s*red/i,
-      'SRAM Force': /sram\s*force/i,
-      'SRAM Rival': /sram\s*rival/i,
-    },
-    'frame': {
-      '高模碳纤维': /高模.*碳|t800|t900|高模量/i,
-      '标准碳纤维': /碳纤维|carbon|碳架/i,
-      '铝合金（高端）': /铝合金|6061|7005|alloy/i,
-      '铝合金（标准）': /铝|aluminum/i,
-      '铬钼钢': /铬钼|chromoly|cr.mo/i,
-      '钢': /钢|steel/i,
-    },
-    'brake': {
-      '油压碟刹': /油压碟|hydraulic\s*disc|油碟/i,
-      '机械碟刹': /机械碟|mechanical\s*disc|线碟/i,
-      '圈刹（双轴）': /圈刹|rim\s*brake|双轴/i,
-      '圈刹（直拉）': /直拉/i,
-    },
-    'drivetrain': {
-      '电子变速（Di2/eTap）': /di2|etap|电子变速|electronic/i,
-      '机械变速': /机械变速|mechanical/i,
-    },
-    'geo_type': {
-      '舒适耐力型': /耐力|endurance|舒适|comfort/i,
-      '均衡型': /均衡|all.?round|versatile/i,
-      '竞速型': /竞速|race|performance/i,
-      '极限竞速型': /极限|aero|pro\s*race/i,
-    },
-    'pid': { '有': /pid|有.*控温|精准.*温/i, '无': /无.*pid|无.*控温/i },
-    'boiler': {
-      '双锅炉': /双锅炉|dual\s*boiler/i,
-      '热交换锅炉': /热交换|heat\s*exchange|HX/i,
-      '单锅炉（大）': /单.*大锅炉|thermoblock/i,
-      '单锅炉（小）': /单锅炉|single\s*boiler/i,
-    },
-    'stretch': {
-      '四向弹力': /四向弹|4.?way|四面弹/i,
-      '双向弹力': /双向弹|2.?way/i,
-      '微弹': /微弹/i,
-      '无弹性': /无弹|不弹/i,
-    },
-    'upf': {
-      'UPF50+': /upf\s*50\+?/i,
-      'UPF40+': /upf\s*40\+?/i,
-      'UPF30+': /upf\s*30\+?/i,
-    },
-    'mosquito': {
-      '有防蚊涂层': /防蚊涂层|驱蚊/i,
-      '物理防蚊（密织）': /物理防蚊|密织/i,
-    },
-    'material': {
-      '尼龙+氨纶': /尼龙.*氨纶|nylon.*spandex|尼龙.*elastane/i,
-      '涤纶+氨纶': /涤纶.*氨纶|polyester.*spandex/i,
-      '尼龙': /尼龙|nylon|锦纶/i,
-      '涤纶': /涤纶|polyester/i,
-      '棉': /棉|cotton/i,
-    },
-    'mesh': {
-      '大面积网眼': /大.*网眼|大面积.*网/i,
-      '局部网眼': /网眼|mesh|透气孔/i,
-    },
-    'waterproof': {
-      'DWR防泼水': /dwr|防泼水|拒水/i,
-      '防水涂层': /防水涂层|waterproof/i,
-    },
-  };
-
-  const kp = keyPatterns[key];
-  if(kp){
-    for(const [optVal, pat] of Object.entries(kp)){
-      if(opts.includes(optVal) && pat.test(text)){
-        return optVal;
-      }
-    }
-  }
-
-  // 通用：检查选项文字是否直接出现在文本中
-  for(const opt of opts){
-    const clean = opt.replace(/[（）()【】]/g,'');
-    if(text.includes(clean) || text.includes(opt)) return opt;
-  }
-
-  return null;
-}
-
 function openAdd(){
   editId=null;
   document.getElementById('mo-title').textContent='添加商品';
-  ['f-name','f-note','f-url'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('url-detect-result').style.display='none';
-  document.getElementById('f-price').value='';
-  document.getElementById('f-status').value='active';
-  document.getElementById('f-cat').value='防晒衣';
+  ['f-name','f-note'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-price').value='';document.getElementById('f-status').value='active';
+  document.getElementById('f-cat').value='公路车';
   ['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el)el.value='';});
-  clearImgPreview();
-  buildParamFields();
+  document.getElementById('paste-params').value='';
+  clearImg();buildParamFields();
   document.getElementById('modal').classList.remove('hidden');
 }
-
 function openEdit(id){
   const item=items.find(i=>i.id===id);if(!item)return;
   editId=id;
@@ -1606,62 +1056,46 @@ function openEdit(id){
   document.getElementById('f-status').value=item.status||'active';
   document.getElementById('f-note').value=item.note||'';
   ['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el)el.value=(item.prices&&item.prices[k])||'';});
-  clearImgPreview();
+  clearImg();
   if(item.img&&item.img.length>10){
     document.getElementById('f-img-data').value=item.img;
-    if(item.img.startsWith('http'))document.getElementById('f-img-url').value=item.img;
-    showImgPreview(item.img);
+    const p=document.getElementById('img-preview');p.src=item.img;p.style.display='block';
+    document.getElementById('img-hint').style.display='none';
+    document.getElementById('img-area').classList.add('has-img');
   }
+  document.getElementById('paste-params').value='';
   buildParamFields();
   const s=sch(item.cat);
-  s.params.forEach(p=>{
-    const el=document.getElementById('fp-'+p.key);
-    if(el&&item.params&&item.params[p.key]!=null)el.value=item.params[p.key];
-  });
+  s.params.forEach(p=>{const el=document.getElementById('fp-'+p.key);if(el&&item.params&&item.params[p.key]!=null)el.value=item.params[p.key];});
   updatePreview();
   document.getElementById('modal').classList.remove('hidden');
 }
-
 function closeModal(){document.getElementById('modal').classList.add('hidden');}
-
 function saveItem(){
   const name=document.getElementById('f-name').value.trim();
   const cat=document.getElementById('f-cat').value;
   const price=+document.getElementById('f-price').value;
   if(!name||!price){toast('请填写名称和价格');return;}
-  const s=sch(cat);
-  const params={};
-  s.params.forEach(p=>{
-    const el=document.getElementById('fp-'+p.key);if(!el)return;
-    const v=p.type==='sel'?el.value:(+el.value||0);
-    if(v&&v!=='')params[p.key]=v;
-  });
-  const prices={};
-  ['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el){const v=+el.value;prices[k]=v||null;}});
+  const s=sch(cat);const params={};
+  s.params.forEach(p=>{const el=document.getElementById('fp-'+p.key);if(!el)return;const v=p.type==='sel'?el.value:(+el.value||0);if(v&&v!=='')params[p.key]=v;});
+  const prices={};['jd','tb','pdd','dy'].forEach(k=>{const el=document.getElementById('fp-'+k);if(el){const v=+el.value;prices[k]=v||null;}});
   const img=document.getElementById('f-img-data').value||'';
-  const now=new Date();
-  const updated=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const now=new Date();const updated=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const rec={name,cat,price,status:document.getElementById('f-status').value,img,note:document.getElementById('f-note').value.trim(),params,prices,updated};
   if(editId){const idx=items.findIndex(i=>i.id===editId);if(idx>=0)items[idx]={...items[idx],...rec};}
   else items.push({id:'u'+Date.now(),...rec});
   saveItems(items);updCount();closeModal();renderAdm();
   toast(editId?'已更新 ✓':'已添加 ✓');
 }
+function delItem(id){if(!confirm('确认删除？'))return;items=items.filter(i=>i.id!==id);saveItems(items);updCount();renderAdm();toast('已删除');}
 
-function delItem(id){
-  if(!confirm('确认删除？'))return;
-  items=items.filter(i=>i.id!==id);
-  saveItems(items);updCount();renderAdm();toast('已删除');
-}
-
-// ════════════════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// 导出导入
+// ════════════════════════════════════════════════════
 function exportData(){
   const b=new Blob([JSON.stringify({items,weights:W},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='shopping-backup-'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();toast('备份已下载 ✓');
+  a.download='shopping-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();toast('备份已下载 ✓');
 }
 function importData(input){
   const f=input.files[0];if(!f)return;
@@ -1671,21 +1105,19 @@ function importData(input){
       const d=JSON.parse(e.target.result);
       if(d.items&&Array.isArray(d.items)){items=d.items;saveItems(items);}
       if(d.weights){W=d.weights;saveW(W);renderPrefs();}
-      updCount();renderAdm();fillAll();renderRec();
-      toast('导入成功 ✓');
+      updCount();renderAdm();fillAll();renderRec();toast('导入成功 ✓');
     }catch{toast('文件格式错误');}
   };
   r.readAsText(f);input.value='';
 }
 
-// ════════════════════════════════════════════════════════════
-// TAB SWITCH
-// ════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════
+// Tab 切换
+// ════════════════════════════════════════════════════
 function switchTab(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');btn.classList.add('active');
   if(id==='rec'){fillSel('rec-cat');renderRec();}
   if(id==='cmp'){fillSel('cmp-cat');renderCmp();}
   if(id==='upg'){fillSel('upg-cat');fillUpgSelects();}
@@ -1693,37 +1125,31 @@ function switchTab(id,btn){
   if(id==='adm')renderAdm();
 }
 
-// ════════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════════
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-// 启动：优先从云端加载
-(async () => {
-  // 显示加载状态
-  document.getElementById('rec-out').innerHTML =
-    '<div class="empty"><div class="empty-icon">☁️</div><p>正在从云端加载数据...</p></div>';
-
-  const ok = await loadItemsCloud();
-  if(ok){
-    // 云端有数据，同步到 localStorage
-    localStorage.setItem('sdi5', JSON.stringify(items));
-    saveW(W);
-  } else {
-    // 云端无数据，用本地数据并上传
-    console.log('Using local data, uploading to cloud...');
-    await saveCloud();
-  }
-
-  fillAll();
-  renderPrefs();
-  renderRec();
-  updCount();
-
-  // 状态指示
-  const badge = document.getElementById('item-count');
-  badge.title = ok ? '✓ 已连接云端' : '使用本地数据';
+// ════════════════════════════════════════════════════
+// 启动
+// ════════════════════════════════════════════════════
+(async()=>{
+  document.getElementById('rec-out').innerHTML='<div class="empty"><div class="empty-icon">☁️</div>正在加载...</div>';
+  const ok=await loadCloud();
+  if(ok){localStorage.setItem('sdi6',JSON.stringify(items));saveW(W);}
+  else await saveCloud();
+  fillAll();renderPrefs();renderRec();updCount();
 })();
 </script>
 </body>
 </html>
+HTMLEOF
+echo "Lines: $(wc -l < /home/claude/index.html)"
+tail -5 /home/claude/index.html
+Output
+
+Lines: 1139
+  fillAll();renderPrefs();renderRec();updCount();
+})();
+</script>
+</body>
+</html>
+Done
+
