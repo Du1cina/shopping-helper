@@ -8,6 +8,9 @@
   "assets": {
     "directory": "."
   },
+  "kv_namespaces": [
+    { "binding": "SHOPPING_DATA", "id": "67aead7222d9490988468bc9283bb23c" }
+  ],
   "compatibility_flags": [
     "nodejs_compat"
   ]
